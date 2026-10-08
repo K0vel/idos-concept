@@ -167,26 +167,41 @@ p { margin: 0; }
 .segment[aria-selected="true"] { color: var(--text-primary); box-shadow: inset 0 -2px 0 var(--border-strong); }
 
 /* ── route list ───────────────────────────────────── */
-.list {
-  flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none;
-  margin: 0 var(--margin-content); border-top: 1px solid var(--border-default);
-}
+/* The list spans the full screen so the chip rows can run to its edges.
+   Text keeps the 32px margin; only the chips scroll past it. */
+.rule { flex: none; height: 1px; margin: 0 var(--margin-content); background: var(--border-default); }
+.list { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
 .list::-webkit-scrollbar { display: none; }
 .cards { display: flex; flex-direction: column; gap: var(--gap-section); padding-top: var(--gap-section); }
-.view-all { display: block; padding: var(--space-8) 0; color: var(--text-secondary); }
+.view-all { display: block; margin: 0 var(--margin-content); padding: var(--space-8) 0; color: var(--text-secondary); }
 
 .card { display: flex; flex-direction: column; gap: var(--space-10); padding-bottom: var(--space-8); }
-.card-head { display: flex; align-items: center; gap: var(--space-4); width: 100%; min-width: 0; min-height: 20px; }
+.card-head { display: flex; align-items: center; gap: var(--space-4); width: calc(100% - 2 * var(--margin-content)); margin: 0 var(--margin-content); min-width: 0; min-height: 20px; }
 .card-head .names { display: flex; align-items: center; gap: var(--space-8); min-width: 0; }
 .card-head .from { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-head .to { flex: none; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dot3 { flex: none; width: 3px; height: 3px; border-radius: var(--radius-full); background: var(--icon-secondary); }
 .card-head .ico { color: var(--icon-secondary); }
 
-.chips { display: flex; gap: var(--space-8); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+/* Full-bleed row: the first chip sits on the 32px margin, the next one peeks in from the screen edge.
+   Spacing between chips is a margin, not a gap, so a leaving chip can collapse to nothing. */
+.chips {
+  display: flex; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; cursor: grab;
+  padding-left: var(--margin-content); scroll-padding-left: var(--margin-content);
+  scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
+}
 .chips::-webkit-scrollbar { display: none; }
+/* end spacer: last chip's 8px margin + 24px = the 32px margin on the right */
+.chips::after { content: ""; flex: none; width: var(--space-24); }
+.chips.is-dragging { cursor: grabbing; scroll-snap-type: none; }
 
-.chip { flex: none; display: flex; width: 160px; height: 60px; background: var(--bg-surface); border-radius: var(--radius-sm); overflow: hidden; scroll-snap-align: start; }
+.chip {
+  flex: none; display: flex; width: 160px; height: 60px; margin-right: var(--space-8);
+  background: var(--bg-surface); border-radius: var(--radius-sm); overflow: hidden; scroll-snap-align: start;
+  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), margin-right 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+}
+.chip.is-entering, .chip.is-leaving { width: 0; margin-right: 0; opacity: 0; }
+.chip.is-leaving { pointer-events: none; }
 
 .badge { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); width: 48px; color: var(--on-line); }
 .badge .glyphs { display: flex; align-items: center; }
@@ -252,7 +267,7 @@ p { margin: 0; }
 
 @keyframes blink { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .swap .ico, .pressable, .tab .frame .ico, .tab .t-nav { transition: none; }
+  .swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip { transition: none; }
   .field .cursor { animation: none; }
 }
 </style>
@@ -275,6 +290,7 @@ p { margin: 0; }
         <button class="segment t-segment" role="tab" aria-selected="false" data-view="recent" id="seg-recent">Recent</button>
       </div>
 
+      <div class="rule"></div>
       <div class="list" id="list" role="tabpanel"></div>
 
       <form class="panel" id="panel" aria-label="Find a connection">
@@ -340,8 +356,11 @@ window.idosIcon = function (key, size, cls) {
 </script>
 <script>
 (function () {
-  var TICK_MS = 5000;       // 5 s of real time = 1 simulated minute, so a short recording shows movement
+  // 5 s of real time = 1 simulated minute, so a short recording shows movement. ?tick=800 speeds it up.
+  var TICK_MS = +((/[?&]tick=(\d+)/.exec(location.search) || [0, 5000])[1]) || 5000;
+  var NOW_HOLD_MS = Math.min(1200, TICK_MS / 4);  // how long "now" stays on a chip before it leaves the row
   var ACTIVE_MAX_MIN = 2;   // design system: a departure this close gets the emphasised time
+  var VISIBLE = 3;          // chips per card: two in view, the third peeks in from the screen edge
 
   var GLYPH = {
     "tram": ["custom:tram"], "bus": ["fill:bus"], "bus-x": ["bold:arrow-elbow-down-right", "fill:bus"],
@@ -349,37 +368,55 @@ window.idosIcon = function (key, size, cls) {
     "metro-a": ["custom:metro"], "metro-b": ["custom:metro"], "metro-c": ["custom:metro"]
   };
 
+  // A route lists the services that run on it. A service departs `first` minutes after load,
+  // then every `every` minutes. The chips are always the next VISIBLE departures across all services.
   var FAVORITES = [
-    { from: "Nádraží Veleslavín", to: "Letiště Praha", deps: [
-      { line: "bus", code: "119", min: 1, platform: "F", wheelchair: true, cooled: true },
-      { line: "bus-x", code: "X109", min: 12, platform: "A", wheelchair: true, cooled: true },
-      { line: "bus", code: "119", min: 16, platform: "F", wheelchair: true, cooled: true } ] },
-    { from: "Můstek", to: "Florenc", deps: [
-      { line: "metro-b", code: "B", min: 1, platform: "2", wheelchair: true, cooled: true },
-      { line: "tram", code: "24", min: 7, platform: "B" },
-      { line: "metro-b", code: "B", min: 9, platform: "2", wheelchair: true, cooled: true } ] },
-    { from: "Ústí nad Labem, hlavní nádraží", to: "Praha, hlavní nádraží", deps: [
-      { line: "train-red", code: "R20", min: 17, platform: "3", wheelchair: true, cooled: true },
-      { line: "train-green", code: "Ex5", min: 43, platform: "8", cooled: true },
-      { line: "train-red", code: "R20", min: 59, platform: "3", wheelchair: true, cooled: true } ] }
+    { id: "f0", from: "Nádraží Veleslavín", to: "Letiště Praha", services: [
+      { line: "bus", code: "119", platform: "F", wheelchair: true, cooled: true, first: 1, every: 15 },
+      { line: "bus-x", code: "X109", platform: "A", wheelchair: true, cooled: true, first: 12, every: 20 } ] },
+    { id: "f1", from: "Můstek", to: "Florenc", services: [
+      { line: "metro-b", code: "B", platform: "2", wheelchair: true, cooled: true, first: 1, every: 8 },
+      { line: "tram", code: "24", platform: "B", first: 7, every: 10 } ] },
+    { id: "f2", from: "Ústí nad Labem, hlavní nádraží", to: "Praha, hlavní nádraží", services: [
+      { line: "train-red", code: "R20", platform: "3", wheelchair: true, cooled: true, first: 17, every: 60 },
+      { line: "train-green", code: "Ex5", platform: "8", cooled: true, first: 43, every: 120 } ] }
   ];
   var RECENT = [
-    { from: "Praha, Divadlo pod Palmovkou", to: "Karlovy Vary, Mattoniho nábř.", deps: [
-      { line: "tram", code: "8", min: 2, platform: "A", wheelchair: true, cooled: true },
-      { line: "tram", code: "25", min: 9, platform: "A", wheelchair: true } ] },
-    { from: "Biskupcova", to: "Vozovna Žižkov", deps: [
-      { line: "tram", code: "9", min: 3, platform: "B", wheelchair: true, cooled: true },
-      { line: "tram", code: "9", min: 11, platform: "B", wheelchair: true, cooled: true } ] },
-    { from: "Praha hl.n.", to: "Kolín", deps: [
-      { line: "train-red", code: "S1", min: 6, platform: "5", wheelchair: true, cooled: true },
-      { line: "train-red", code: "S1", min: 36, platform: "5", wheelchair: true, cooled: true } ] },
-    { from: "Home", to: "Krejcárek", deps: [
-      { line: "bus", code: "133", min: 4, platform: "A", wheelchair: true },
-      { line: "bus", code: "133", min: 14, platform: "A", wheelchair: true } ] }
+    { id: "r0", from: "Praha, Divadlo pod Palmovkou", to: "Karlovy Vary, Mattoniho nábř.", services: [
+      { line: "tram", code: "8", platform: "A", wheelchair: true, cooled: true, first: 2, every: 10 },
+      { line: "tram", code: "25", platform: "A", wheelchair: true, first: 9, every: 12 } ] },
+    { id: "r1", from: "Biskupcova", to: "Vozovna Žižkov", services: [
+      { line: "tram", code: "9", platform: "B", wheelchair: true, cooled: true, first: 3, every: 8 } ] },
+    { id: "r2", from: "Praha hl.n.", to: "Kolín", services: [
+      { line: "train-red", code: "S1", platform: "5", wheelchair: true, cooled: true, first: 6, every: 30 } ] },
+    { id: "r3", from: "Home", to: "Krejcárek", services: [
+      { line: "bus", code: "133", platform: "A", wheelchair: true, first: 4, every: 10 } ] }
   ];
-  [FAVORITES, RECENT].forEach(function (set) {
-    set.forEach(function (r) { r.deps.forEach(function (d) { d.base = d.min; }); });
-  });
+
+  var clock = 0;   // simulated minutes since load
+  var gone = {};   // departures whose "now" has been shown and that have left the row
+
+  // The next VISIBLE departures of a route, soonest first. A longer prefix of the same sorted
+  // sequence is always a superset, so as time passes chips only ever leave the front and join the back.
+  function upcoming(route) {
+    var list = [];
+    route.services.forEach(function (s, i) {
+      var k = Math.max(0, Math.ceil((clock - s.first) / s.every)), n = 0;
+      while (n <= VISIBLE) {
+        var t = s.first + k * s.every, key = route.id + ":" + i + ":" + t;
+        k++;
+        if (gone[key]) continue;
+        list.push({ key: key, svc: s, idx: i, t: t, min: t - clock });
+        n++;
+      }
+    });
+    list.sort(function (a, b) { return a.t - b.t || a.idx - b.idx; });
+    return list.slice(0, VISIBLE);
+  }
+  function viewOf(d) {
+    var s = d.svc;
+    return { line: s.line, code: s.code, platform: s.platform, wheelchair: s.wheelchair, cooled: s.cooled, min: d.min };
+  }
 
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function icon(key, size, cls) { return window.idosIcon(key, size, cls); }
@@ -401,20 +438,62 @@ window.idosIcon = function (key, size, cls) {
     return '<button class="chip" aria-label="' + esc(d.code + ", " + when(d) + ", platform " + d.platform) + '">' +
       badge(d) + '<span class="chip-info">' + t + amenities(d) + "</span></button>";
   }
-  function card(r) {
+  function cardHead(r) {
     return '<section class="card"><button class="card-head pressable t-place-strong">' +
       '<span class="names"><span class="from">' + esc(r.from) + '</span><span class="dot3"></span><span class="to">' + esc(r.to) + "</span></span>" +
-      icon("bold:caret-right", 12) + "</button>" +
-      '<div class="chips">' + r.deps.map(chip).join("") + "</div></section>";
+      icon("bold:caret-right", 12) + '</button><div class="chips"></div></section>';
   }
 
   var list = document.getElementById("list");
-  var view = "fav";
-  function render() {
-    var x = Array.prototype.map.call(list.querySelectorAll(".chips"), function (c) { return c.scrollLeft; });
-    list.innerHTML = '<div class="cards">' + (view === "fav" ? FAVORITES : RECENT).map(card).join("") + "</div>" +
-      (view === "fav" ? '<button class="view-all t-link pressable">View all</button>' : "");
-    Array.prototype.forEach.call(list.querySelectorAll(".chips"), function (c, i) { if (x[i]) c.scrollLeft = x[i]; });
+  var tab = "fav";
+  var rows = [];   // one entry per rendered card: { route, row, els: key -> chip element }
+
+  function makeChip(d) {
+    var box = document.createElement("div");
+    box.innerHTML = chip(viewOf(d));
+    return box.firstChild;
+  }
+  function updateChip(el, d) {
+    var v = viewOf(d), w = el.querySelector(".when"), text = when(v), cls = "when " + timeClass(v);
+    if (w.textContent !== text) w.textContent = text;
+    if (w.className !== cls) w.className = cls;
+    el.setAttribute("aria-label", v.code + ", " + text + ", platform " + v.platform);
+  }
+  function enter(el) {
+    el.classList.add("is-entering");
+    void el.offsetWidth;                      // commit the collapsed state, then release it so it animates open
+    el.classList.remove("is-entering");
+  }
+  function leave(el) {
+    el.classList.add("is-leaving");
+    el.setAttribute("aria-hidden", "true");
+    el.tabIndex = -1;
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+  }
+  function sync(entry, instant) {
+    var want = upcoming(entry.route), keep = {};
+    want.forEach(function (d) { keep[d.key] = true; });
+    Object.keys(entry.els).forEach(function (key) {
+      if (!keep[key]) { leave(entry.els[key]); delete entry.els[key]; }
+    });
+    want.forEach(function (d) {
+      var el = entry.els[d.key];
+      if (!el) {
+        el = entry.els[d.key] = makeChip(d);
+        entry.row.appendChild(el);            // new departures always join at the end of the row
+        if (!instant) enter(el);
+      }
+      updateChip(el, d);
+    });
+  }
+
+  function mount() {
+    var routes = tab === "fav" ? FAVORITES : RECENT;
+    list.innerHTML = '<div class="cards">' + routes.map(cardHead).join("") + "</div>" +
+      (tab === "fav" ? '<button class="view-all t-link pressable">View all</button>' : "");
+    var rowEls = list.querySelectorAll(".chips");
+    rows = routes.map(function (route, i) { return { route: route, row: rowEls[i], els: {} }; });
+    rows.forEach(function (e) { sync(e, true); });
   }
   function hydrateIcons(root) {
     Array.prototype.forEach.call(root.querySelectorAll("[data-icon]"), function (el) {
@@ -422,25 +501,57 @@ window.idosIcon = function (key, size, cls) {
     });
   }
   hydrateIcons(document);
-  render();
+  mount();
 
+  // Each tick advances the clock one minute. A chip that reaches 0 shows "now" for a moment, then leaves
+  // and the next departure on that route slides into the row.
   setInterval(function () {
-    [FAVORITES, RECENT].forEach(function (set) {
-      set.forEach(function (r) { r.deps.forEach(function (d) { d.min = d.min <= 0 ? d.base : d.min - 1; }); });
-    });
-    render();
+    clock++;
+    gone = {};
+    rows.forEach(function (e) { sync(e); });
+    setTimeout(function () {
+      rows.forEach(function (e) {
+        upcoming(e.route).forEach(function (d) { if (d.min <= 0) gone[d.key] = true; });
+        sync(e);
+      });
+    }, NOW_HOLD_MS);
   }, TICK_MS);
+
+  // A mouse has no touch scrolling, so let it drag the chip rows.
+  var drag = null;
+  list.addEventListener("pointerdown", function (e) {
+    var row = e.pointerType === "mouse" && e.target.closest(".chips");
+    if (row) drag = { row: row, x: e.clientX, left: row.scrollLeft, moved: false };
+  });
+  window.addEventListener("pointermove", function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x;
+    if (!drag.moved && Math.abs(dx) < 4) return;
+    drag.moved = true;
+    drag.row.classList.add("is-dragging");
+    drag.row.scrollLeft = drag.left - dx;
+  });
+  window.addEventListener("pointerup", function () {
+    if (!drag) return;
+    var row = drag.row, moved = drag.moved;
+    drag = null;
+    row.classList.remove("is-dragging");
+    if (!moved) return;
+    function swallow(ev) { ev.stopPropagation(); ev.preventDefault(); }
+    row.addEventListener("click", swallow, true);       // a drag must not count as a tap on the chip under the cursor
+    setTimeout(function () { row.removeEventListener("click", swallow, true); }, 0);
+  });
 
   Array.prototype.forEach.call(document.querySelectorAll(".segment"), function (seg) {
     seg.addEventListener("click", function () {
-      view = seg.getAttribute("data-view");
+      tab = seg.getAttribute("data-view");
       Array.prototype.forEach.call(document.querySelectorAll(".segment"), function (s) {
         var on = s === seg;
         s.setAttribute("aria-selected", on ? "true" : "false");
         s.className = "segment " + (on ? "t-segment-active" : "t-segment");
       });
       list.scrollTop = 0;
-      render();
+      mount();
     });
   });
 
