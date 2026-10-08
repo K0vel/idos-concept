@@ -146,7 +146,9 @@ p { margin: 0; }
 }
 @media (max-width: 520px) {
   body { background: var(--bg-canvas); }
-  .stage { padding: 0; gap: 0; }
+  /* a real height (not min-height), otherwise the device's height:100% has nothing to resolve against
+     and the screen shrinks to its content instead of filling a tall phone */
+  .stage { padding: 0; gap: 0; height: 100%; min-height: 0; }
   .device { width: 100%; height: 100%; border-radius: 0; box-shadow: none; }
   .sys { display: none !important; }
 }
@@ -195,17 +197,21 @@ p { margin: 0; }
 .chips::after { content: ""; flex: none; width: var(--space-24); }
 .chips.is-dragging { cursor: grabbing; scroll-snap-type: none; }
 
+/* Chip width follows the screen so two chips plus a 25px peek of the third always fit:
+   393 → 160 (the Figma size), 428 (iPhone 13 Pro Max) → 177, 375 → 151. Never narrower than its content needs. */
+.device { container-type: inline-size; }
 .chip {
   flex: none; display: flex; width: 160px; height: 60px; margin-right: var(--space-8);
   background: var(--bg-surface); border-radius: var(--radius-sm); overflow: hidden; scroll-snap-align: start;
   transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), margin-right 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
 }
+@supports (width: 1cqw) { .chip { width: clamp(148px, calc((100cqw - 73px) / 2), 200px); } }
 .chip.is-entering, .chip.is-leaving { width: 0; margin-right: 0; opacity: 0; }
 .chip.is-leaving { pointer-events: none; }
 
 /* "now" blinks over the hold, then the chip leaves. --blink (one cycle) and --blinks (count) are set from the script. */
-.when.is-now { animation: now-blink var(--blink, 450ms) ease-in-out var(--blinks, 4); }
-@keyframes now-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.1; } }
+.when.is-now { animation: now-blink var(--blink, 650ms) ease-in-out var(--blinks, 4); }
+@keyframes now-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 
 .badge { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); width: 48px; color: var(--on-line); }
 .badge .glyphs { display: flex; align-items: center; }
@@ -225,12 +231,17 @@ p { margin: 0; }
 
 /* ── search panel ─────────────────────────────────── */
 .panel { position: relative; flex: none; margin: var(--space-8) var(--margin-panel) 0; background: var(--bg-surface); border-radius: var(--radius-sm); }
-.field { display: flex; align-items: center; gap: var(--space-8); width: 100%; height: var(--row-field); padding: 0 var(--space-16); color: var(--icon-secondary); }
+.field { display: flex; align-items: center; gap: var(--space-8); width: 100%; height: var(--row-field); padding: 0 var(--space-16); color: var(--icon-secondary); cursor: text; }
 .field + .field { border-top: 1px solid var(--border-subtle); }
-.field .value { flex: 1; min-width: 0; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.field.is-focused .value { color: var(--text-primary); }
-.field .cursor { width: 2px; height: 22px; background: var(--action-primary); margin-left: -6px; display: none; animation: blink 1s step-end infinite; }
-.field.is-focused .cursor { display: block; }
+/* a real text input: Figma draws the value in text-secondary, it turns primary while being edited */
+.field .value {
+  flex: 1; min-width: 0; height: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; outline: 0; background: none;
+  -webkit-appearance: none; appearance: none; text-overflow: ellipsis;
+  color: var(--text-secondary); caret-color: var(--action-primary);
+  -webkit-user-select: text; user-select: text;   /* the device frame disables selection; an input must not inherit that */
+}
+.field .value::placeholder { color: var(--text-secondary); opacity: 1; }
+.field:focus-within .value { color: var(--text-primary); }
 .swap {
   position: absolute; top: 36px; right: 48px; width: 40px; height: 40px; border-radius: var(--radius-full);
   display: flex; align-items: center; justify-content: center;
@@ -269,12 +280,11 @@ p { margin: 0; }
 .pressable:active { opacity: 0.6; }
 .chip:active { opacity: 0.85; }
 
-@keyframes blink { 50% { opacity: 0; } }
 /* Reduced motion is honoured, except when the page is opened with ?motion=on (screen recordings on a machine
    that has system animations switched off). */
 @media (prefers-reduced-motion: reduce) {
   :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip) { transition: none; }
-  :root:not(.motion-on) :is(.field .cursor, .when.is-now) { animation: none; }
+  :root:not(.motion-on) .when.is-now { animation: none; }
 }
 </style>
 </head>
@@ -300,16 +310,18 @@ p { margin: 0; }
       <div class="list" id="list" role="tabpanel"></div>
 
       <form class="panel" id="panel" aria-label="Find a connection">
-        <button type="button" class="field" id="fieldFrom" aria-label="From">
+        <label class="field">
           <span data-icon="bold:sign-in" data-size="20"></span>
-          <span class="value t-field" id="valueFrom">Biskupcova</span><span class="cursor"></span>
+          <input class="value t-field" id="valueFrom" type="text" value="Biskupcova" placeholder="From" aria-label="From"
+                 autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="next">
           <span data-icon="bold:map-trifold" data-size="20"></span>
-        </button>
-        <button type="button" class="field" id="fieldTo" aria-label="To">
+        </label>
+        <label class="field">
           <span data-icon="bold:sign-out" data-size="20"></span>
-          <span class="value t-field" id="valueTo">Vozovna Žižkov</span><span class="cursor"></span>
+          <input class="value t-field" id="valueTo" type="text" value="Vozovna Žižkov" placeholder="To" aria-label="To"
+                 autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="search">
           <span data-icon="bold:map-trifold" data-size="20"></span>
-        </button>
+        </label>
         <button type="button" class="swap" id="swap" aria-label="Swap origin and destination">
           <span data-icon="bold:arrows-down-up" data-size="20"></span>
         </button>
@@ -326,7 +338,7 @@ p { margin: 0; }
       <div class="elsewhere" id="elsewhere" hidden>
         <p class="t-segment-active" id="elsewhereTitle"></p>
         <p class="note t-option">Not part of this concept yet</p>
-        <p class="disclaimer">Unofficial redesign concept. Not affiliated with IDOS or CHAPS. Build a62c718</p>
+        <p class="disclaimer">Unofficial redesign concept. Not affiliated with IDOS or CHAPS. Build 97fdcb2</p>
       </div>
     </div>
 
@@ -366,7 +378,7 @@ window.idosIcon = function (key, size, cls) {
   var TICK_MS = +((/[?&]tick=(\d+)/.exec(location.search) || [0, 5000])[1]) || 5000;
   if (/[?&]motion=on\b/.test(location.search)) document.documentElement.classList.add("motion-on");
   var BLINKS = 4;           // how many times "now" blinks before its chip leaves the row
-  var NOW_HOLD_MS = Math.min(1800, TICK_MS * 0.4);  // how long "now" stays on a chip: BLINKS cycles
+  var NOW_HOLD_MS = Math.min(2600, TICK_MS * 0.52); // how long "now" stays on a chip: BLINKS cycles of 650 ms
   document.documentElement.style.setProperty("--blink", NOW_HOLD_MS / BLINKS + "ms");
   document.documentElement.style.setProperty("--blinks", BLINKS);
   var ACTIVE_MAX_MIN = 2;   // design system: a departure this close gets the emphasised time
@@ -565,23 +577,35 @@ window.idosIcon = function (key, size, cls) {
     });
   });
 
-  var fields = [document.getElementById("fieldFrom"), document.getElementById("fieldTo")];
-  fields.forEach(function (f) {
-    f.addEventListener("click", function (e) {
-      e.stopPropagation();
-      fields.forEach(function (o) { o.classList.toggle("is-focused", o === f && !f.classList.contains("is-focused")); });
+  // Origin and destination are real text fields. Focusing one selects its value so typing replaces it;
+  // Enter on the first moves to the second, Enter on the second (or Search) closes the keyboard.
+  var from = document.getElementById("valueFrom"), to = document.getElementById("valueTo");
+  [from, to].forEach(function (input) {
+    input.addEventListener("focus", function () {
+      setTimeout(function () { input.setSelectionRange(0, input.value.length); }, 0);
     });
   });
-  document.addEventListener("click", function () { fields.forEach(function (o) { o.classList.remove("is-focused"); }); });
+  from.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); to.focus(); }
+  });
 
   var swap = document.getElementById("swap");
-  swap.addEventListener("click", function (e) {
-    e.stopPropagation();
-    var a = document.getElementById("valueFrom"), b = document.getElementById("valueTo"), t = a.textContent;
-    a.textContent = b.textContent; b.textContent = t;
+  swap.addEventListener("click", function () {
+    var t = from.value; from.value = to.value; to.value = t;
     swap.classList.toggle("is-flipped");
   });
-  document.getElementById("panel").addEventListener("submit", function (e) { e.preventDefault(); });
+  document.getElementById("panel").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  });
+  // iOS scrolls overflow:hidden ancestors to reveal a focused field and can leave them shifted once the keyboard closes
+  document.addEventListener("focusout", function () {
+    setTimeout(function () {
+      document.querySelector(".device").scrollTop = 0;
+      document.querySelector(".main").scrollTop = 0;
+      window.scrollTo(0, 0);
+    }, 60);
+  });
 
   var elsewhere = document.getElementById("elsewhere");
   Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (tab) {
