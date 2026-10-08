@@ -203,6 +203,10 @@ p { margin: 0; }
 .chip.is-entering, .chip.is-leaving { width: 0; margin-right: 0; opacity: 0; }
 .chip.is-leaving { pointer-events: none; }
 
+/* "now" blinks over the hold, then the chip leaves. --blink (one cycle) and --blinks (count) are set from the script. */
+.when.is-now { animation: now-blink var(--blink, 450ms) ease-in-out var(--blinks, 4); }
+@keyframes now-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.1; } }
+
 .badge { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); width: 48px; color: var(--on-line); }
 .badge .glyphs { display: flex; align-items: center; }
 .badge[data-line="tram"] { background: var(--line-tram); }
@@ -266,9 +270,11 @@ p { margin: 0; }
 .chip:active { opacity: 0.85; }
 
 @keyframes blink { 50% { opacity: 0; } }
+/* Reduced motion is honoured, except when the page is opened with ?motion=on (screen recordings on a machine
+   that has system animations switched off). */
 @media (prefers-reduced-motion: reduce) {
-  .swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip { transition: none; }
-  .field .cursor { animation: none; }
+  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip) { transition: none; }
+  :root:not(.motion-on) :is(.field .cursor, .when.is-now) { animation: none; }
 }
 </style>
 </head>
@@ -320,7 +326,7 @@ p { margin: 0; }
       <div class="elsewhere" id="elsewhere" hidden>
         <p class="t-segment-active" id="elsewhereTitle"></p>
         <p class="note t-option">Not part of this concept yet</p>
-        <p class="disclaimer">Unofficial redesign concept. Not affiliated with IDOS or CHAPS. Build 176dfc5</p>
+        <p class="disclaimer">Unofficial redesign concept. Not affiliated with IDOS or CHAPS. Build a62c718</p>
       </div>
     </div>
 
@@ -358,7 +364,11 @@ window.idosIcon = function (key, size, cls) {
 (function () {
   // 5 s of real time = 1 simulated minute, so a short recording shows movement. ?tick=800 speeds it up.
   var TICK_MS = +((/[?&]tick=(\d+)/.exec(location.search) || [0, 5000])[1]) || 5000;
-  var NOW_HOLD_MS = Math.min(1200, TICK_MS / 4);  // how long "now" stays on a chip before it leaves the row
+  if (/[?&]motion=on\b/.test(location.search)) document.documentElement.classList.add("motion-on");
+  var BLINKS = 4;           // how many times "now" blinks before its chip leaves the row
+  var NOW_HOLD_MS = Math.min(1800, TICK_MS * 0.4);  // how long "now" stays on a chip: BLINKS cycles
+  document.documentElement.style.setProperty("--blink", NOW_HOLD_MS / BLINKS + "ms");
+  document.documentElement.style.setProperty("--blinks", BLINKS);
   var ACTIVE_MAX_MIN = 2;   // design system: a departure this close gets the emphasised time
   var VISIBLE = 3;          // chips per card: two in view, the third peeks in from the screen edge
 
@@ -454,7 +464,7 @@ window.idosIcon = function (key, size, cls) {
     return box.firstChild;
   }
   function updateChip(el, d) {
-    var v = viewOf(d), w = el.querySelector(".when"), text = when(v), cls = "when " + timeClass(v);
+    var v = viewOf(d), w = el.querySelector(".when"), text = when(v), cls = "when " + timeClass(v) + (v.min <= 0 ? " is-now" : "");
     if (w.textContent !== text) w.textContent = text;
     if (w.className !== cls) w.className = cls;
     el.setAttribute("aria-label", v.code + ", " + text + ", platform " + v.platform);
