@@ -178,6 +178,7 @@ p { margin: 0; }
 .view-all { display: block; margin: 0 var(--margin-content); padding: var(--space-8) 0; color: var(--text-secondary); }
 
 .card { display: flex; flex-direction: column; gap: var(--space-10); padding-bottom: var(--space-8); }
+.card[hidden] { display: none; }
 .card-head { display: flex; align-items: center; gap: var(--space-4); width: calc(100% - 2 * var(--margin-content)); margin: 0 var(--margin-content); min-width: 0; min-height: 20px; }
 .card-head .names { display: flex; align-items: center; gap: var(--space-8); min-width: 0; }
 .card-head .from { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -338,7 +339,7 @@ p { margin: 0; }
       <div class="elsewhere" id="elsewhere" hidden>
         <p class="t-segment-active" id="elsewhereTitle"></p>
         <p class="note t-option">Not part of this concept yet</p>
-        <p class="disclaimer">Unofficial redesign concept. Not affiliated with IDOS or CHAPS. Build 97fdcb2</p>
+        <p class="disclaimer">Unofficial redesign concept. Not affiliated with IDOS or CHAPS. Build 5f4de9f</p>
       </div>
     </div>
 
@@ -401,7 +402,9 @@ window.idosIcon = function (key, size, cls) {
       { line: "tram", code: "24", platform: "B", first: 7, every: 10 } ] },
     { id: "f2", from: "Ústí nad Labem, hlavní nádraží", to: "Praha, hlavní nádraží", services: [
       { line: "train-red", code: "R20", platform: "3", wheelchair: true, cooled: true, first: 17, every: 60 },
-      { line: "train-green", code: "Ex5", platform: "8", cooled: true, first: 43, every: 120 } ] }
+      { line: "train-green", code: "Ex5", platform: "8", cooled: true, first: 43, every: 120 } ] },
+    { id: "f3", from: "Biskupcova", to: "Vozovna Žižkov", services: [
+      { line: "tram", code: "9", platform: "B", wheelchair: true, cooled: true, first: 3, every: 8 } ] }
   ];
   var RECENT = [
     { id: "r0", from: "Praha, Divadlo pod Palmovkou", to: "Karlovy Vary, Mattoniho nábř.", services: [
@@ -516,7 +519,20 @@ window.idosIcon = function (key, size, cls) {
     var rowEls = list.querySelectorAll(".chips");
     rows = routes.map(function (route, i) { return { route: route, row: rowEls[i], els: {} }; });
     rows.forEach(function (e) { sync(e, true); });
+    fitExtras();
   }
+  // The first three cards always show. Each card after them is shown only if the list can hold it
+  // without scrolling, so a tall phone gets a fourth row and the 852 design frame keeps three.
+  function fitExtras() {
+    var extras = Array.prototype.slice.call(list.querySelectorAll(".card"), 3);
+    extras.forEach(function (c) { c.hidden = true; });
+    for (var i = 0; i < extras.length; i++) {
+      extras[i].hidden = false;
+      if (list.scrollHeight > list.clientHeight) { extras[i].hidden = true; break; }
+    }
+  }
+  if (window.ResizeObserver) new ResizeObserver(fitExtras).observe(list);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitExtras);
   function hydrateIcons(root) {
     Array.prototype.forEach.call(root.querySelectorAll("[data-icon]"), function (el) {
       el.outerHTML = icon(el.getAttribute("data-icon"), +el.getAttribute("data-size"), el.getAttribute("data-cls"));
