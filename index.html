@@ -670,7 +670,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build f689e2e -->
+  <!-- Build c159ced -->
 </div>
 
 <script>
@@ -1616,7 +1616,7 @@ window.IDOS_TRIPS = (function () {
       stopGlide();
       var from = rev, start = performance.now(), dist = target - from, dir = dist < 0 ? -1 : 1, reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches && !document.documentElement.classList.contains("motion-on");
       if (reduce || from === target) { set(target); return; }
-      var dur = 340 + 260 * Math.abs(dist) / 100;                          // 340 to 600 ms
+      var dur = 250 + 220 * Math.abs(dist) / 100;                          // 250 to 470 ms: between the quick first version (180-340) and the slow one (340-600)
       var m0 = Math.min(Math.max(0, (v0 || 0) * dir) * dur, 1.1 * Math.abs(dist)) * dir;   // carry the finger's speed in, only towards the target, never a lunge
       overlay.classList.add("is-dragging");                                // no CSS transitions while the script drives it
       (function step(now) {
