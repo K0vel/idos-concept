@@ -17,3 +17,9 @@ Icons: [Phosphor Icons](https://phosphoricons.com) (MIT) plus custom IDOS glyphs
 ## Before and after
 
 [compare.html](https://k0vel.github.io/idos-concept/compare.html): the original IDOS screens next to the redesign, one slider per screen. Original screenshots are used only for comparison; personal data in them is replaced.
+
+## Snapshots
+
+Frozen copies of a build, for showing a version to a team while the main link keeps changing. Made with `idos-snapshot.js` (in the portfolio repo, cases/idos).
+
+- [v1](https://k0vel.github.io/idos-concept/v1/): 09.10, content matched to the original app screenshots, compare slider with auto-glide.

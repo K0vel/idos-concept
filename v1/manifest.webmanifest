@@ -1,0 +1,30 @@
+{
+  "name": "IDOS Concept",
+  "short_name": "IDOS",
+  "description": "Unofficial redesign concept of the IDOS Connection screen by Artur K. Not affiliated with IDOS or CHAPS.",
+  "lang": "en",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F1F0F6",
+  "theme_color": "#F1F0F6",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

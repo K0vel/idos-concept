@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Unofficial IDOS redesign concept: the original app next to the redesign, one slider per screen.">
+<meta name="theme-color" content="#F1F0F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141414" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<title>IDOS Before and After</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600;700&display=swap">
+<style>
+/* IDOS design system — code tokens.
+   Source of truth: Figma "Idos" › Redesign › frame "2" (78:2110). Rules: idos-design-system.md.
+   Light values mirror what is on the canvas. Change a value here only after it changed in Figma.
+   The dark theme (blocks below :root) is defined in code first and has not been drawn in Figma yet. */
+
+:root {
+  color-scheme: light;
+
+  /* ── Primitives ─────────────────────────────────────────── */
+  --neutral-0: #FFFFFF;
+  --neutral-100: #F1F0F6;
+  --neutral-150: #E6E6F0;
+  --neutral-200: #DBDBDB;
+  --neutral-500: #858585;
+  --neutral-600: #6B6B6B;
+  --neutral-1000: #141414;
+  --brand-500: #0171BB;
+  --brand-600: #015F9E;
+  --green-700: #0A7D0C;
+  --red-600: #D00E15;
+  --red-500: #E31E25;
+  --blue-600: #0000FF;
+  --purple-600: #800080;
+  --green-600: #009847;
+  --yellow-500: #FDC500;
+
+  /* ── Semantic: colour ───────────────────────────────────── */
+  --bg-canvas: var(--neutral-100);          /* screen background */
+  --bg-surface: var(--neutral-0);           /* chips, search panel, swap button */
+  --text-primary: var(--neutral-1000);
+  --text-secondary: var(--neutral-600);     /* 5.33:1 on white, 4.70:1 on canvas: passes AA */
+  --text-inverse: var(--neutral-0);          /* text on a --text-primary surface (the toast) */
+  --on-action: var(--neutral-0);             /* text on --action-primary: white in both themes */
+  --text-brand: var(--brand-500);
+  --icon-primary: var(--neutral-1000);
+  --icon-secondary: var(--neutral-500);     /* 3.69:1 on white, 3.26:1 on canvas: passes the 3:1 for icons */
+  --border-subtle: var(--neutral-150);      /* dividers inside a surface */
+  --border-default: var(--neutral-200);     /* rules on the canvas, dot separators */
+  --border-strong: var(--neutral-1000);     /* active segmented-tab underline */
+  --action-primary: var(--brand-500);
+  --action-primary-pressed: var(--brand-600);
+  --amenity: var(--green-700);              /* platform marker + letter */
+  --status-ok: var(--green-700);            /* "on time" text and its dot, 5.33:1 on white; the only status colour */
+  --bg-scrim: rgb(20 20 20 / 0.4);          /* behind a bottom sheet */
+
+  /* Line colours: identity of the route, never status */
+  --line-tram: var(--red-600);
+  --line-bus: var(--blue-600);
+  --line-bus-x: var(--purple-600);
+  --line-train-red: var(--red-600);
+  --line-train-green: var(--green-600);
+  --line-metro-a: var(--green-600);
+  --line-metro-b: var(--yellow-500);
+  --line-metro-c: var(--red-500);
+  --line-trol: var(--green-600);
+  --on-line: var(--neutral-0);
+  --on-line-metro-b: var(--neutral-1000);   /* the only dark-on-colour badge */
+
+  /* ── Typography ─────────────────────────────────────────── */
+  --font-ui: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* ── Spacing (2px steps below 12, 4px steps above) ──────── */
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+
+  /* ── Layout ─────────────────────────────────────────────── */
+  --margin-content: var(--space-32);        /* lists, segmented tabs, tab bar */
+  --margin-panel: var(--space-16);          /* docked search panel */
+  --gap-section: var(--space-20);           /* between route cards; panel → tab bar */
+
+  /* ── Radius ─────────────────────────────────────────────── */
+  --radius-sm: 4px;                         /* chips, panels: the only visible radius */
+  --radius-full: 999px;                     /* swap button, dots */
+
+  /* ── Size ───────────────────────────────────────────────── */
+  --icon-xs: 12px;
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+  --tap-min: 44px;
+  --row-field: 56px;
+  --row-control: 48px;
+}
+
+/* ── Dark theme: semantic tokens only. Chosen with the theme switch (data-theme) or, if never chosen, the system setting.
+   The two blocks must stay identical. ─────────────────────────────── */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-canvas: #141414;
+  --bg-surface: #1F1F1F;
+  --text-primary: #FFFFFF;                  /* 16.5:1 on surface */
+  --text-secondary: #9A9A9A;                /* 5.9:1 on surface, 6.6:1 on canvas */
+  --text-inverse: #141414;
+  --text-brand: #4DA6E8;                    /* 6.2:1 on surface; the light brand (#0171BB) is only 3.2:1 here */
+  --icon-primary: #FFFFFF;
+  --icon-secondary: #8A8A8A;                /* 4.8:1 on surface */
+  --border-subtle: #141414;                /* = canvas: a divider inside a surface is a gap showing the background, as in light */
+  --border-default: #3D3D3D;
+  --border-strong: #FFFFFF;
+  --amenity: #4CC84F;                       /* platform marker + letter, 7.6:1 on surface */
+  --status-ok: #4CC84F;
+  --bg-scrim: rgb(0 0 0 / 0.6);
+  /* action-primary (#0171BB), its pressed state, line colours and --on-line stay as in light: white text on them passes, and line colours are identity */
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg-canvas: #141414;
+    --bg-surface: #1F1F1F;
+    --text-primary: #FFFFFF;                  /* 16.5:1 on surface */
+    --text-secondary: #9A9A9A;                /* 5.9:1 on surface, 6.6:1 on canvas */
+    --text-inverse: #141414;
+    --text-brand: #4DA6E8;                    /* 6.2:1 on surface; the light brand (#0171BB) is only 3.2:1 here */
+    --icon-primary: #FFFFFF;
+    --icon-secondary: #8A8A8A;                /* 4.8:1 on surface */
+    --border-subtle: #141414;                /* = canvas: a divider inside a surface is a gap showing the background, as in light */
+    --border-default: #3D3D3D;
+    --border-strong: #FFFFFF;
+    --amenity: #4CC84F;                       /* platform marker + letter, 7.6:1 on surface */
+    --status-ok: #4CC84F;
+    --bg-scrim: rgb(0 0 0 / 0.6);
+    /* action-primary (#0171BB), its pressed state, line colours and --on-line stay as in light: white text on them passes, and line colours are identity */
+  }
+}
+
+/* ── Type roles: use these, never raw font settings ──────── */
+.t-segment        { font: 500 20px/24px var(--font-ui); letter-spacing: -0.5px; }
+.t-segment-active { font: 600 20px/24px var(--font-ui); letter-spacing: -0.5px; }
+.t-field          { font: 500 18px/24px var(--font-ui); letter-spacing: -0.5px; }
+.t-time-active    { font: 600 16px/22px var(--font-ui); letter-spacing: -0.5px; }
+.t-time           { font: 500 14px/22px var(--font-ui); letter-spacing: -0.25px; }
+.t-code           { font: 700 14px/20px var(--font-ui); letter-spacing: 0; }
+.t-button         { font: 700 14px/20px var(--font-ui); letter-spacing: 0; text-transform: uppercase; }
+.t-option         { font: 600 12px/18px var(--font-ui); letter-spacing: 0; text-transform: uppercase; }
+.t-link           { font: 700 12px/18px var(--font-ui); letter-spacing: 0; text-transform: uppercase; }
+.t-nav            { font: 700 12px/20px var(--font-ui); letter-spacing: 0; text-transform: uppercase; }
+.t-place-strong   { font: 600 14px/20px var(--font-ui); letter-spacing: 0; }
+.t-row            { font: 500 18px/24px var(--font-ui); letter-spacing: -0.5px; }
+.t-row-meta       { font: 500 14px/20px var(--font-ui); letter-spacing: 0; }
+.t-stop           { font: 500 16px/22px var(--font-ui); letter-spacing: -0.25px; }
+
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: var(--bg-canvas); }
+body { margin: 0; background: var(--bg-canvas); color: var(--text-primary); font-family: var(--font-ui); }
+p, h1, h2 { margin: 0; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+:focus-visible { outline: 2px solid var(--action-primary); outline-offset: 2px; }
+
+.page { max-width: 1120px; margin: 0 auto; padding: var(--space-32) var(--space-16) var(--space-40); display: flex; flex-direction: column; gap: var(--space-32); }
+header { display: flex; flex-direction: column; gap: var(--space-12); max-width: 640px; }
+h1 { font: 600 28px/32px var(--font-ui); letter-spacing: -0.5px; }
+.lede { color: var(--text-secondary); font: 500 16px/24px var(--font-ui); }
+.how { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-16) var(--space-32); }
+.how .hint { color: var(--text-secondary); }
+
+.theme { display: inline-flex; gap: var(--space-24); }
+.theme button { min-height: var(--tap-min); color: var(--text-secondary); border-bottom: 2px solid transparent; }
+.theme button[aria-pressed="true"] { color: var(--text-primary); border-bottom-color: var(--border-strong); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-32) var(--space-24); }
+figure { margin: 0; display: flex; flex-direction: column; gap: var(--space-12); max-width: 393px; width: 100%; justify-self: center; }
+figcaption { display: flex; flex-direction: column; gap: var(--space-4); }
+figcaption .t-place-strong { font-size: 16px; line-height: 22px; }
+figcaption .note { color: var(--text-secondary); }
+
+.cmp { --pos: 50%; position: relative; aspect-ratio: 1284 / 2778; border-radius: var(--radius-sm); overflow: hidden; background: var(--bg-surface); touch-action: pan-y; cursor: ew-resize; user-select: none; -webkit-user-select: none; box-shadow: 0 0 0 1px var(--border-subtle); }
+.cmp img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-user-drag: none; }
+.cmp .before { clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+.cmp .line { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 2px; margin-left: -1px; background: var(--text-primary); pointer-events: none; }
+.cmp .grip { position: absolute; top: 50%; left: var(--pos); width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: var(--radius-full); background: var(--text-primary); color: var(--text-inverse); display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.cmp:focus-visible { outline-offset: 4px; }
+.tag { position: absolute; top: var(--space-8); padding: var(--space-4) var(--space-8); border-radius: var(--radius-sm); background: var(--text-primary); color: var(--text-inverse); pointer-events: none; }
+.tag.l { left: var(--space-8); }
+.tag.r { right: var(--space-8); }
+.ico { display: block; }
+footer { color: var(--text-secondary); max-width: 640px; }
+footer p + p { margin-top: var(--space-8); }
+a { color: var(--text-brand); }
+</style>
+</head>
+<body>
+<main class="page">
+  <header>
+    <h1>IDOS, before and after</h1>
+    <p class="lede">The original app on the left of the handle, the redesign concept on the right. Drag the handle on any screen, or focus it and use the arrow keys.</p>
+    <div class="how">
+      <div class="theme" role="group" aria-label="Theme of the redesign">
+        <button type="button" class="t-option" data-theme="light" aria-pressed="true">Light</button>
+        <button type="button" class="t-option" data-theme="dark" aria-pressed="false">Dark</button>
+      </div>
+      <a class="t-link" href="./">Open the live prototype</a>
+    </div>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <footer class="t-row-meta">
+    <p>Screenshots of the original app are shown only for comparison; the account name is replaced by a made-up one.</p>
+    <p>Times and routes differ between the two sides because they were captured at different moments.</p>
+  </footer>
+</main>
+
+<script>
+var SCREENS = [
+  ["connection", "Connection", "Next departures come first, as two tappable chips per route. The search sits at the bottom, within thumb reach."],
+  ["results", "Search results", "One white card per connection. Times, platforms and status share one grid, so options can be compared by eye."],
+  ["trip", "Trip", "Every leg follows one pattern: line, direction, stops, status. Actions stay in one row under the back button."],
+  ["trip-end", "Restrictions, carriers, fare", "Three plain sections instead of banded lists, all in the same two text sizes."],
+  ["tickets", "Tickets", "An empty state that says what is missing and gives the one next step, a button to buy a ticket."],
+  ["more", "More", "Same entries, one line-icon style at one weight, and a dark-theme switch right in the list."]
+];
+var theme = (function () {
+  var forced = /[?&]theme=(light|dark)\b/.exec(location.search);
+  if (forced) return forced[1];
+  return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+})();
+var grid = document.getElementById("grid"), cmps = [];
+// every picture comes in three widths, so the browser never shrinks a big one 3x (that is what makes small text look broken)
+var BEFORE_W = { connection: 1183, results: 1183, trip: 1183, tickets: 1183, "dark-connection": 1183, "dark-results": 1183, "dark-trip": 1183, "dark-more": 1183, "dark-tickets": 1183 };
+var BEFORE_DARK = { connection: 1, results: 1, trip: 1, more: 1, tickets: 1 };   // the original app has a dark theme, but no dark "trip end" screenshot
+function srcset(base, full) { return "compare/" + base + "-393.webp 393w, compare/" + base + "-590.webp 590w, compare/" + base + "-786.webp 786w, compare/" + base + ".webp " + full + "w"; }
+
+SCREENS.forEach(function (s) {
+  var fig = document.createElement("figure");
+  fig.innerHTML =
+    '<div class="cmp" role="slider" tabindex="0" aria-label="' + s[1] + ': reveal the original" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half original, half redesign">' +
+      '<img class="after" alt="Redesign concept: ' + s[1] + '" width="1284" height="2778" loading="lazy" decoding="async">' +
+      '<img class="before" alt="Original IDOS app: ' + s[1] + '" width="1284" height="2778" loading="lazy" decoding="async" sizes="(max-width: 440px) 100vw, 393px" src="compare/before-' + s[0] + '.webp" srcset="' + srcset("before-" + s[0], BEFORE_W[s[0]] || 1284) + '">' +
+      '<span class="line"></span><span class="grip" aria-hidden="true"><svg class="ico" width="28" height="28" viewBox="0 0 256 256" fill="currentColor" focusable="false"><path transform="translate(-64 0)" d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/><path transform="translate(64 0)" d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></span>' +
+      '<span class="tag l t-option">Before</span><span class="tag r t-option">After</span>' +
+    '</div>' +
+    '<figcaption><h2 class="t-place-strong">' + s[1] + '</h2><p class="note t-row-meta">' + s[2] + '</p></figcaption>';
+  grid.appendChild(fig);
+  var box = fig.querySelector(".cmp");
+  cmps.push({ key: s[0], box: box, after: box.querySelector(".after"), before: box.querySelector(".before") });
+
+  function set(p) {
+    p = Math.max(0, Math.min(100, p));
+    box.style.setProperty("--pos", p + "%");
+    box.setAttribute("aria-valuenow", Math.round(p));
+    box.setAttribute("aria-valuetext", p < 8 ? "Redesign only" : p > 92 ? "Original only" : Math.round(p) + " percent original");
+  }
+  function at(e) { var r = box.getBoundingClientRect(); return (e.clientX - r.left) / r.width * 100; }
+  var dragging = false, startX = 0, moved = false;
+  box.addEventListener("pointerdown", function (e) { dragging = true; moved = false; startX = e.clientX; box.setPointerCapture(e.pointerId); set(at(e)); });
+  box.addEventListener("pointermove", function (e) { if (dragging) { moved = true; set(at(e)); } });
+  box.addEventListener("pointerup", function () { dragging = false; });
+  box.addEventListener("pointercancel", function () { dragging = false; });
+  box.addEventListener("keydown", function (e) {
+    var now = +box.getAttribute("aria-valuenow"), step = e.shiftKey ? 25 : 5;
+    if (e.key === "ArrowLeft") { set(now - step); e.preventDefault(); }
+    else if (e.key === "ArrowRight") { set(now + step); e.preventDefault(); }
+    else if (e.key === "Home") { set(0); e.preventDefault(); }
+    else if (e.key === "End") { set(100); e.preventDefault(); }
+  });
+});
+
+function setTheme(t) {
+  theme = t;
+  cmps.forEach(function (c) { var b = "after-" + t + "-" + c.key; c.after.sizes = "(max-width: 440px) 100vw, 393px"; c.after.srcset = srcset(b, 1284); c.after.src = "compare/" + b + ".webp";
+    var o = (t === "dark" && BEFORE_DARK[c.key] ? "before-dark-" : "before-") + c.key;     // the original in the same theme where we have it
+    c.before.sizes = "(max-width: 440px) 100vw, 393px"; c.before.srcset = srcset(o, BEFORE_W[o.replace("before-", "")] || 1284); c.before.src = "compare/" + o + ".webp"; });
+  Array.prototype.forEach.call(document.querySelectorAll(".theme button"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-theme") === t ? "true" : "false"); });
+}
+Array.prototype.forEach.call(document.querySelectorAll(".theme button"), function (b) { b.addEventListener("click", function () { setTheme(b.getAttribute("data-theme")); }); });
+setTheme(theme);
+</script>
+</body>
+</html>
