@@ -462,6 +462,8 @@ p { margin: 0; }
   .cmp-orig { background: #F7F7F7; }   /* the original tab bar colour: if a phone is a few pixels taller than the screenshot, the strip reads as the tab bar */
   .cmp-orig img { position: absolute; left: 0; top: calc(-10.98vw + env(safe-area-inset-top, 0px)); width: 100%; height: auto; }   /* 47 / 428 of the width: the screenshot's own status bar */
 }
+.cmp-hint { position: absolute; z-index: 2; width: 240px; padding: var(--space-12) var(--space-16); border-radius: var(--radius-sm); background: var(--text-primary); color: var(--text-inverse); pointer-events: none; }
+.cmp-hint[hidden] { display: none; }
 .cmp-orig .none { position: absolute; right: var(--margin-content); top: 40%; width: 200px; color: var(--text-secondary); }
 .cmp-handle { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 44px; margin-left: -22px; pointer-events: none; touch-action: none; cursor: ew-resize; display: flex; justify-content: center; }
 .cmp-overlay.is-open .cmp-handle { pointer-events: auto; }
@@ -640,12 +642,13 @@ p { margin: 0; }
     <div class="home-zone"><span class="sys"></span></div>
     <div class="cmp-overlay" id="cmpOverlay" hidden>
       <div class="cmp-orig" id="cmpOrig"></div>
+      <div class="cmp-hint t-row-meta" id="cmpHint" role="status" hidden></div>
       <div class="cmp-handle" id="cmpHandle" role="slider" tabindex="0" aria-label="Before and after: drag left to reveal the original IDOS screen" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Original hidden">
         <span class="cmp-line"></span><span class="cmp-grip"><span data-icon="regular:arrows-left-right" data-size="20"></span></span>
       </div>
     </div>
   </div>
-  <!-- Build 62c3fd4 -->
+  <!-- Build 15f7eaa -->
 </div>
 
 <script>
@@ -1540,6 +1543,7 @@ window.IDOS_TRIPS = (function () {
       handle.setAttribute("aria-valuenow", Math.round(rev));
       handle.setAttribute("aria-valuetext", rev >= 100 ? "Original only" : open ? Math.round(rev) + " percent original" : "Original hidden");
       clearInterval(timer);
+      if (!open || dragging) hideHint();
       if (open) { refresh(); timer = setInterval(refresh, 350); }
       else { orig.innerHTML = ""; shown = ""; }
     }
@@ -1559,6 +1563,19 @@ window.IDOS_TRIPS = (function () {
       else if (rev < 6) set(0);                        // let go near an edge: it docks there, a clean prototype or a clean original
       else if (rev > 94) set(100);
     }
+    // the left part is only a picture of the original app: say so where the finger is
+    var hint = document.getElementById("cmpHint"), hintTimer = 0;
+    function hideHint() { clearTimeout(hintTimer); hint.hidden = true; }
+    orig.addEventListener("click", function (e) {
+      var r = overlay.getBoundingClientRect();
+      hint.textContent = "This is a screenshot of the original IDOS app, the Before version. It is not interactive.";
+      hint.hidden = false;
+      var x = e.clientX - r.left - 120, y = e.clientY - r.top - hint.offsetHeight - 20;
+      hint.style.left = Math.max(16, Math.min(r.width - 256, x)) + "px";
+      hint.style.top = Math.max(16, Math.min(r.height - hint.offsetHeight - 16, y)) + "px";
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(hideHint, 3200);
+    });
     handle.addEventListener("pointerup", end);
     handle.addEventListener("pointercancel", end);
     handle.addEventListener("keydown", function (e) {
