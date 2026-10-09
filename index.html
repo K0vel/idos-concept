@@ -465,6 +465,7 @@ p { margin: 0; }
 }
 .cmp-hint { position: absolute; z-index: 2; width: 240px; padding: var(--space-12) var(--space-16); border-radius: var(--radius-sm); background: var(--text-primary); color: var(--text-inverse); pointer-events: none; }
 .cmp-hint[hidden] { display: none; }
+.cmp-overlay.dark-shot .cmp-orig { background: #000; }   /* the dark original: its tab bar colour */
 .cmp-orig .none { position: absolute; right: var(--margin-content); top: 40%; width: 200px; color: var(--text-secondary); }
 .cmp-handle { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 44px; margin-left: -22px; pointer-events: none; touch-action: none; cursor: ew-resize; display: flex; justify-content: center; }
 .cmp-overlay.is-open .cmp-handle { pointer-events: auto; }
@@ -473,13 +474,11 @@ p { margin: 0; }
 /* the grip is the only part you can touch at rest: a tab on the edge, then a full circle while you pull it */
 .cmp-grip { position: absolute; top: calc(42% + 6px); left: 0; width: 44px; height: 44px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--text-primary); color: var(--text-inverse); outline: 1px solid var(--bg-canvas); pointer-events: auto; transition: transform 0.25s var(--ease-page), background-color 0.2s ease; }
 .cmp-grip::before { content: ""; position: absolute; inset: -10px -4px -10px -14px; }   /* the tap target is 62 x 64 */
-.cmp-grip > * { transition: transform 0.25s var(--ease-page); transform: translateX(-11px); }   /* at rest only the half inside the screen shows: the icon sits in it */
-.cmp-overlay.is-open .cmp-grip > * { transform: none; }
-.cmp-overlay.is-full .cmp-grip > * { transform: translateX(11px); }
+
 .cmp-overlay.is-open .cmp-grip { background: var(--action-primary); color: var(--on-action); }
 .cmp-overlay.is-full .cmp-grip { background: var(--text-primary); color: var(--text-inverse); }   /* all the way in: a clean original, the tab waits on the left edge */
 .cmp-overlay.is-full .cmp-line { opacity: 0; }
-.cmp-overlay.is-dragging .cmp-grip, .cmp-overlay.is-dragging .cmp-grip > * { transition: none; }
+.cmp-overlay.is-dragging .cmp-grip { transition: none; }
 .cmp-handle:focus-visible { outline: none; }
 :root.kbd .cmp-handle:focus-visible .cmp-grip { outline: 2px solid var(--action-primary); outline-offset: 2px; }
 
@@ -499,7 +498,7 @@ p { margin: 0; }
 /* Reduced motion is honoured, except when the page is opened with ?motion=on (screen recordings on a machine
    that has system animations switched off). */
 @media (prefers-reduced-motion: reduce) {
-  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after, .cmp-grip, .cmp-grip > *, .cmp-line) { transition: none; }
+  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after, .cmp-grip, .cmp-line) { transition: none; }
   :root:not(.motion-on) .when.is-now { animation: none; }
 }
 </style>
@@ -656,7 +655,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build 360f91d -->
+  <!-- Build 542b63e -->
 </div>
 
 <script>
@@ -1520,7 +1519,8 @@ window.IDOS_TRIPS = (function () {
     var overlay = document.getElementById("cmpOverlay"), orig = document.getElementById("cmpOrig"), handle = document.getElementById("cmpHandle");
     var SHOT = { connection: "Connection", results: "Search results", trip: "Trip", "trip-end": "Restrictions, carriers and fare", more: "More" };
     // the same picture in three widths: the browser takes the one that matches the screen, so small text is never shrunk 3x on the fly
-    var FULLW = { connection: 1183 };
+    var FULLW = { connection: 1183, results: 1183, trip: 1183, "dark-connection": 1183, "dark-results": 1183, "dark-trip": 1183, "dark-more": 1183 };
+    var HAVE_DARK = { connection: 1, results: 1, trip: 1, more: 1 };   // the original app has a dark theme too; these screens exist in it
     function picAttrs(s) {
       var b = "compare/before-" + s;
       return 'src="' + b + '.webp" srcset="' + b + '-400.webp 400w, ' + b + '-800.webp 800w, ' + b + '.webp ' + (FULLW[s] || 1284) + 'w" sizes="(max-width: 520px) 100vw, 393px"';
@@ -1530,7 +1530,7 @@ window.IDOS_TRIPS = (function () {
     var probe = new Image();
     probe.onload = function () {
       overlay.hidden = false;
-      Object.keys(SHOT).forEach(function (k) { var im = new Image(); im.sizes = "(max-width: 520px) 100vw, 393px"; im.srcset = "compare/before-" + k + "-400.webp 400w, compare/before-" + k + "-800.webp 800w, compare/before-" + k + ".webp " + (FULLW[k] || 1284) + "w"; im.src = "compare/before-" + k + ".webp"; });   // ready before the first pull
+      Object.keys(SHOT).concat(Object.keys(HAVE_DARK).map(function (k) { return "dark-" + k; })).forEach(function (k) { var im = new Image(); im.sizes = "(max-width: 520px) 100vw, 393px"; im.srcset = "compare/before-" + k + "-400.webp 400w, compare/before-" + k + "-800.webp 800w, compare/before-" + k + ".webp " + (FULLW[k] || 1284) + "w"; im.src = "compare/before-" + k + ".webp"; });   // ready before the first pull
     };
     probe.src = "compare/before-connection.webp";
 
@@ -1542,10 +1542,11 @@ window.IDOS_TRIPS = (function () {
     }
     // the original follows whatever screen the prototype is on
     function refresh() {
-      var s = screenNow();
-      if (s === shown && orig.firstChild) return;
-      shown = s;
-      orig.innerHTML = s ? '<img ' + picAttrs(s) + ' alt="Original IDOS app: ' + SHOT[s] + '" width="1284" height="2778" decoding="async" draggable="false">'
+      var s = screenNow(), dark = !!s && isDark() && !!HAVE_DARK[s], key = (dark ? "dark-" : "") + s;
+      if (key === shown && orig.firstChild) return;
+      shown = key;
+      overlay.classList.toggle("dark-shot", dark);
+      orig.innerHTML = s ? '<img ' + picAttrs(key) + ' alt="Original IDOS app' + (dark ? ", dark theme" : "") + ': ' + SHOT[s] + '" width="1284" height="2778" decoding="async" draggable="false">'
         : '<p class="none t-row">The original app has no screen like this one.</p>';
     }
     function set(v) {
