@@ -448,20 +448,20 @@ p { margin: 0; }
 .later:active { background: var(--bg-canvas); }
 .empty { margin: var(--space-24) var(--space-4); color: var(--text-secondary); }
 
-/* ── Compare: a tab on the right edge, a small menu, and the original screen laid over the prototype ───────── */
-.fab { position: absolute; right: 0; top: 42%; z-index: 60; width: 32px; height: 56px; display: flex; align-items: center; justify-content: center; background: var(--text-primary); color: var(--text-inverse); border-radius: var(--radius-full) 0 0 var(--radius-full); transition: background-color 0.2s ease; }
+/* ── Compare: a tab on the right edge turns on a live before/after slider over the prototype ───────── */
+.fab { position: absolute; right: 0; top: 42%; z-index: 70; width: 32px; height: 56px; display: flex; align-items: center; justify-content: center; background: var(--text-primary); color: var(--text-inverse); border-radius: var(--radius-full) 0 0 var(--radius-full); transition: background-color 0.2s ease; }
 .fab::before { content: ""; position: absolute; inset: -4px 0 -4px -12px; }   /* the tap target is 44 x 64 */
 .fab[aria-pressed="true"] { background: var(--action-primary); color: var(--on-action); }
-.fab[hidden], .cmp-menu[hidden], .cmp-overlay[hidden] { display: none; }
-.cmp-overlay { position: absolute; inset: 0; z-index: 50; background: var(--bg-canvas); display: flex; align-items: center; justify-content: center; }
-.cmp-overlay img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
-.cmp-overlay .none { padding: 0 var(--margin-content); text-align: center; color: var(--text-secondary); }
-.cmp-menu { position: absolute; right: 40px; top: calc(42% - 44px); z-index: 60; width: 232px; padding: var(--space-16); display: flex; flex-direction: column; gap: var(--space-12); background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-sm); }
-.ba { display: flex; border: 1px solid var(--border-default); border-radius: var(--radius-sm); overflow: hidden; }
-.ba button { flex: 1; height: var(--tap-min); display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: background-color 0.15s ease, color 0.15s ease; }
-.ba button[aria-checked="true"] { background: var(--text-primary); color: var(--text-inverse); }
-.cmp-note { color: var(--text-secondary); }
-.cmp-link { display: flex; align-items: center; min-height: var(--tap-min); margin-top: calc(-1 * var(--space-4)); color: var(--text-brand); text-decoration: none; }
+.fab[hidden], .cmp-overlay[hidden] { display: none; }
+.cmp-overlay { --pos: 50%; position: absolute; inset: 0; z-index: 60; pointer-events: none; }
+.cmp-orig { position: absolute; inset: 0; background: var(--bg-canvas); clip-path: inset(0 calc(100% - var(--pos)) 0 0); pointer-events: auto; }
+.cmp-orig img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.cmp-orig .none { position: absolute; left: var(--margin-content); top: 40%; width: 200px; color: var(--text-secondary); }
+.cmp-handle { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 44px; margin-left: -22px; display: flex; justify-content: center; pointer-events: auto; touch-action: none; cursor: ew-resize; }
+.cmp-line { width: 2px; background: var(--text-primary); outline: 1px solid var(--bg-canvas); }
+.cmp-grip { position: absolute; top: 50%; left: 0; width: 44px; height: 44px; margin-top: -22px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--text-primary); color: var(--text-inverse); outline: 1px solid var(--bg-canvas); }
+.cmp-handle:focus-visible { outline: none; }
+.cmp-handle:focus-visible .cmp-grip { outline: 2px solid var(--action-primary); outline-offset: 2px; }
 
 /* ── overlay for tabs outside this concept ───────── */
 .empty-state { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-8); padding: 0 var(--margin-content); text-align: center; }
@@ -479,7 +479,7 @@ p { margin: 0; }
 /* Reduced motion is honoured, except when the page is opened with ?motion=on (screen recordings on a machine
    that has system animations switched off). */
 @media (prefers-reduced-motion: reduce) {
-  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after, .fab, .ba button) { transition: none; }
+  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after, .fab) { transition: none; }
   :root:not(.motion-on) .when.is-now { animation: none; }
 }
 </style>
@@ -613,18 +613,6 @@ p { margin: 0; }
         <div class="group"><button type="button" class="row cancel" data-act="cancel"><span class="label t-row">Cancel</span></button></div>
       </div>
 
-      <div class="cmp-overlay" id="cmpOverlay" hidden></div>
-      <button type="button" class="fab" id="cmpFab" aria-label="Compare with the original" aria-haspopup="dialog" aria-expanded="false" aria-pressed="false" hidden><span data-icon="regular:arrows-left-right" data-size="20"></span></button>
-      <div class="cmp-menu" id="cmpMenu" role="dialog" aria-label="Compare with the original" hidden>
-        <p class="t-place-strong">Compare</p>
-        <div class="ba" role="radiogroup" aria-label="Version">
-          <button type="button" class="t-option" role="radio" aria-checked="false" data-ba="before">Before</button>
-          <button type="button" class="t-option" role="radio" aria-checked="true" data-ba="after">After</button>
-        </div>
-        <p class="t-row-meta cmp-note" id="cmpNote" aria-live="polite">The redesign. Switch to Before to see the original IDOS app on this screen.</p>
-        <a class="t-link cmp-link" href="compare.html">Side by side</a>
-      </div>
-
       <div class="toast t-row-meta" id="toast" role="status" aria-live="polite"></div>
     </div>
 
@@ -634,8 +622,15 @@ p { margin: 0; }
       <button class="tab" data-tab="more"><span class="frame"><span data-icon="duotone:squares-four" data-size="24" data-cls="ic-default"></span><span data-icon="duotone:squares-four" data-size="32" data-cls="ic-active"></span></span><span class="t-nav">More</span></button>
     </nav>
     <div class="home-zone"><span class="sys"></span></div>
+    <div class="cmp-overlay" id="cmpOverlay" hidden>
+      <div class="cmp-orig" id="cmpOrig"></div>
+      <div class="cmp-handle" id="cmpHandle" role="slider" tabindex="0" aria-label="Compare: drag to reveal the original" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50 percent original">
+        <span class="cmp-line"></span><span class="cmp-grip"><span data-icon="regular:arrows-left-right" data-size="24"></span></span>
+      </div>
+    </div>
+    <button type="button" class="fab" id="cmpFab" aria-label="Compare with the original" aria-pressed="false" hidden><span data-icon="regular:arrows-left-right" data-size="20"></span></button>
   </div>
-  <!-- Build 9af1129 -->
+  <!-- Build b273741 -->
 </div>
 
 <script>
@@ -1491,14 +1486,13 @@ window.IDOS_TRIPS = (function () {
   syncTheme();
 
   // ══ Compare with the original ═════════════════════════════════════════════════════════════════════════
-  // A tab on the right edge opens a menu with Before / After. Before lays the original IDOS screen (a screenshot) over the
-  // prototype, After removes it. The tab only shows if the screenshots are next to this page (they are not in the single-file
-  // artifact copy) and never in ?fab=off, which the screenshot script for the before/after page uses.
+  // The tab on the right edge turns on a live slider: the original IDOS screen (a screenshot) is laid over the left part of the
+  // prototype up to the handle, the working prototype stays on the right. Drag the handle at any moment. The tab only shows if
+  // the screenshots are next to this page (the single-file artifact copy has none) and never with ?fab=off.
   (function () {
-    var fab = document.getElementById("cmpFab"), menu = document.getElementById("cmpMenu"), overlay = document.getElementById("cmpOverlay"), note = document.getElementById("cmpNote");
-    var inertParts = [document.querySelector(".main"), document.querySelector(".tabbar")];
+    var fab = document.getElementById("cmpFab"), overlay = document.getElementById("cmpOverlay"), orig = document.getElementById("cmpOrig"), handle = document.getElementById("cmpHandle");
     var SHOT = { connection: "Connection", results: "Search results", trip: "Trip", "trip-end": "Restrictions, carriers and fare", more: "More" };
-    var before = false, menuOpen = false;
+    var on = false, shown = "", timer = 0;
     if (/[?&]fab=off\b/.test(location.search)) return;
     var probe = new Image();
     probe.onload = function () { fab.hidden = false; };
@@ -1508,42 +1502,46 @@ window.IDOS_TRIPS = (function () {
       if (tripEl.classList.contains("is-open")) return tripScroll.scrollTop > 120 ? "trip-end" : "trip";
       if (res) return "results";
       var tabNow = document.querySelector(".tab[aria-current=page]").getAttribute("data-tab");
-      return tabNow === "connection" ? "connection" : tabNow === "more" ? "more" : null;
+      return tabNow === "connection" ? "connection" : tabNow === "more" ? "more" : "";
     }
-    function setNote() {
+    // the original on the left follows whatever screen the prototype is on
+    function refresh() {
       var s = screenNow();
-      note.textContent = !before ? "The redesign. Switch to Before to see the original IDOS app on this screen."
-        : s ? "The original IDOS app: " + SHOT[s] + "." : "The original app has no screen like this one.";
+      if (s === shown && orig.firstChild) return;
+      shown = s;
+      orig.innerHTML = s ? '<img src="compare/before-' + s + '.webp" alt="Original IDOS app: ' + SHOT[s] + '" width="1284" height="2778" decoding="async" draggable="false">'
+        : '<p class="none t-row">The original app has no screen like this one.</p>';
     }
-    function showOriginal() {
-      var s = screenNow();
-      overlay.innerHTML = s ? '<img src="compare/before-' + s + '.webp" alt="Original IDOS app: ' + SHOT[s] + '" width="1284" height="2778" decoding="async">'
-        : '<p class="none t-row">No original screenshot for this screen.</p>';
-      overlay.hidden = false;
-      inertParts.forEach(function (el) { el.inert = true; });
+    function setPos(p) {
+      p = Math.max(4, Math.min(96, p));
+      overlay.style.setProperty("--pos", p + "%");
+      handle.setAttribute("aria-valuenow", Math.round(p));
+      handle.setAttribute("aria-valuetext", Math.round(p) + " percent original");
     }
-    function setBefore(on) {
-      before = on;
-      if (on) showOriginal(); else { overlay.hidden = true; overlay.innerHTML = ""; inertParts.forEach(function (el) { el.inert = false; }); }
-      fab.setAttribute("aria-pressed", on ? "true" : "false");
-      Array.prototype.forEach.call(menu.querySelectorAll("[data-ba]"), function (b) { b.setAttribute("aria-checked", (b.getAttribute("data-ba") === "before") === on ? "true" : "false"); });
-      setNote();
+    function setOn(v) {
+      on = v;
+      overlay.hidden = !v;
+      fab.setAttribute("aria-pressed", v ? "true" : "false");
+      clearInterval(timer);
+      if (v) { setPos(50); shown = ""; refresh(); timer = setInterval(refresh, 350); }
+      else orig.innerHTML = "";
     }
-    function setMenu(open) {
-      menuOpen = open;
-      menu.hidden = !open;
-      fab.setAttribute("aria-expanded", open ? "true" : "false");
-      if (open) { setNote(); menu.querySelector('[aria-checked="true"]').focus({ preventScroll: true }); }
-    }
-    fab.addEventListener("click", function () { setMenu(!menuOpen); });
-    menu.addEventListener("click", function (e) {
-      var b = e.target.closest("[data-ba]");
-      if (b) setBefore(b.getAttribute("data-ba") === "before");
+    fab.addEventListener("click", function () { setOn(!on); });
+
+    var dragging = false;
+    function at(e) { var r = overlay.getBoundingClientRect(); return (e.clientX - r.left) / r.width * 100; }
+    handle.addEventListener("pointerdown", function (e) { dragging = true; handle.setPointerCapture(e.pointerId); setPos(at(e)); });
+    handle.addEventListener("pointermove", function (e) { if (dragging) setPos(at(e)); });
+    handle.addEventListener("pointerup", function () { dragging = false; });
+    handle.addEventListener("pointercancel", function () { dragging = false; });
+    handle.addEventListener("keydown", function (e) {
+      var now = +handle.getAttribute("aria-valuenow"), step = e.shiftKey ? 25 : 5;
+      if (e.key === "ArrowLeft") { setPos(now - step); e.preventDefault(); }
+      else if (e.key === "ArrowRight") { setPos(now + step); e.preventDefault(); }
+      else if (e.key === "Home") { setPos(0); e.preventDefault(); }
+      else if (e.key === "End") { setPos(100); e.preventDefault(); }
     });
-    document.addEventListener("click", function (e) { if (menuOpen && !menu.contains(e.target) && !fab.contains(e.target)) setMenu(false); });
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && menuOpen) { e.stopPropagation(); setMenu(false); fab.focus({ preventScroll: true }); }
-    }, true);
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && on && (document.activeElement === handle || document.activeElement === fab)) { setOn(false); fab.focus({ preventScroll: true }); } }, true);
   })();
 
 
