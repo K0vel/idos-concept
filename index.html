@@ -333,7 +333,7 @@ p { margin: 0; }
    Rows are separated inside a group by border-subtle, groups by the 20px section gap. */
 .more { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--bg-canvas); }
 .more[hidden] { display: none; }
-.more-title { flex: none; height: 44px; margin: 17px var(--margin-content) 0; padding-bottom: var(--space-20); }
+.more-title { flex: none; height: 24px; margin: 17px var(--margin-content) 0; }
 .more-title h1 { margin: 0; font-weight: inherit; font-size: inherit; line-height: inherit; }
 .more-list { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: var(--gap-section); padding: var(--gap-section) var(--margin-content) var(--space-24); }
 .more-list::-webkit-scrollbar { display: none; }
@@ -412,8 +412,10 @@ p { margin: 0; }
 .sheet .row { padding: 0 var(--space-16); }
 .sheet .cancel .label { font-weight: 600; }
 .sheet .row .label { flex: 1; color: var(--text-primary); }
-.sheet .row .tick { color: var(--text-brand); opacity: 0; }
-.sheet .row[aria-checked="true"] .tick { opacity: 1; }
+.switch { flex: none; position: relative; width: 52px; height: 32px; margin-left: auto; border-radius: var(--radius-full); background: var(--icon-secondary); transition: background-color 0.2s ease; }
+.switch::after { content: ""; position: absolute; top: 4px; left: 4px; width: 24px; height: 24px; border-radius: var(--radius-full); background: var(--on-action); transition: transform 0.25s var(--ease-page); }
+[aria-checked="true"] > .switch { background: var(--action-primary); }
+[aria-checked="true"] > .switch::after { transform: translateX(20px); }
 
 .toast { position: absolute; left: 50%; bottom: var(--space-24); max-width: calc(100% - 2 * var(--margin-panel)); padding: var(--space-12) var(--space-16); border-radius: var(--radius-sm); background: var(--text-primary); color: var(--text-inverse); text-align: center; opacity: 0; visibility: hidden; transform: translate(-50%, 8px); transition: opacity 0.2s ease, transform 0.25s var(--ease-page), visibility 0s 0.25s; pointer-events: none; }
 .toast.is-on { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition: opacity 0.2s ease, transform 0.25s var(--ease-page); }
@@ -462,7 +464,7 @@ p { margin: 0; }
 /* Reduced motion is honoured, except when the page is opened with ?motion=on (screen recordings on a machine
    that has system animations switched off). */
 @media (prefers-reduced-motion: reduce) {
-  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later) { transition: none; }
+  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after) { transition: none; }
   :root:not(.motion-on) .when.is-now { animation: none; }
 }
 </style>
@@ -550,7 +552,7 @@ p { margin: 0; }
             <button type="button" class="row"><span data-icon="regular:signpost" data-size="20"></span><span class="label t-row">Departures</span><span data-icon="regular:caret-right" data-size="16"></span></button>
             <button type="button" class="row"><span data-icon="regular:users" data-size="20"></span><span class="label t-row">Passengers</span><span data-icon="regular:caret-right" data-size="16"></span></button>
             <button type="button" class="row"><span data-icon="regular:gear-six" data-size="20"></span><span class="label t-row">Settings</span><span data-icon="regular:caret-right" data-size="16"></span></button>
-            <button type="button" class="row" id="themeRow" aria-haspopup="dialog"><span data-icon="regular:circle-half" data-size="20"></span><span class="label t-row">Appearance</span><span class="value t-row-meta" id="themeValue">System</span><span data-icon="regular:caret-right" data-size="16"></span></button>
+            <button type="button" class="row" id="themeSwitch" role="switch" aria-checked="false"><span data-icon="regular:circle-half" data-size="20"></span><span class="label t-row">Dark theme</span><span class="switch" aria-hidden="true"></span></button>
             <button type="button" class="row"><span data-icon="regular:question" data-size="20"></span><span class="label t-row">Help</span><span data-icon="regular:caret-right" data-size="16"></span></button>
             <button type="button" class="row"><span data-icon="regular:headset" data-size="20"></span><span class="label t-row">Support and contacts</span><span data-icon="regular:caret-right" data-size="16"></span></button>
             <button type="button" class="row"><span data-icon="regular:info" data-size="20"></span><span class="label t-row">About</span><span data-icon="regular:caret-right" data-size="16"></span></button>
@@ -596,15 +598,6 @@ p { margin: 0; }
         <div class="group"><button type="button" class="row cancel" data-act="cancel"><span class="label t-row">Cancel</span></button></div>
       </div>
 
-      <div class="sheet" id="themeSheet" role="dialog" aria-modal="true" aria-label="Appearance">
-        <div class="group" role="radiogroup" aria-label="Appearance">
-          <button type="button" class="row" role="radio" aria-checked="false" data-theme-set="system"><span class="label t-row">System</span><span data-icon="regular:check" data-size="20" data-cls="tick"></span></button>
-          <button type="button" class="row" role="radio" aria-checked="false" data-theme-set="light"><span class="label t-row">Light</span><span data-icon="regular:check" data-size="20" data-cls="tick"></span></button>
-          <button type="button" class="row" role="radio" aria-checked="false" data-theme-set="dark"><span class="label t-row">Dark</span><span data-icon="regular:check" data-size="20" data-cls="tick"></span></button>
-        </div>
-        <div class="group"><button type="button" class="row cancel" data-theme-set="cancel"><span class="label t-row">Cancel</span></button></div>
-      </div>
-
       <div class="toast t-row-meta" id="toast" role="status" aria-live="polite"></div>
     </div>
 
@@ -615,7 +608,7 @@ p { margin: 0; }
     </nav>
     <div class="home-zone"><span class="sys"></span></div>
   </div>
-  <!-- Build 11e29ce -->
+  <!-- Build 4ab694a -->
 </div>
 
 <script>
@@ -1450,51 +1443,25 @@ window.IDOS_TRIPS = (function () {
   })();
 
   // ══ Appearance ════════════════════════════════════════════════════════════════════════════════════════
-  // System (default), Light or Dark. The choice is kept in localStorage; with "System" only the CSS media query decides.
-  var THEME_NAME = { system: "System", light: "Light", dark: "Dark" };
-  var themeSheet = document.getElementById("themeSheet"), themeOpen = false;
-  function savedTheme() { try { var v = localStorage.getItem("idos-theme"); return v === "light" || v === "dark" ? v : "system"; } catch (e) { return "system"; } }
-  function syncThemeColor() {
+  // One switch in More. Until it is used the theme follows the system; from then on the choice is kept in localStorage.
+  var themeSwitch = document.getElementById("themeSwitch");
+  var darkMq = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
+  function isDark() { var a = document.documentElement.getAttribute("data-theme"); return a ? a === "dark" : !!(darkMq && darkMq.matches); }
+  function syncTheme() {
+    themeSwitch.setAttribute("aria-checked", isDark() ? "true" : "false");
     var c = getComputedStyle(document.querySelector(".device")).backgroundColor;
     Array.prototype.forEach.call(document.querySelectorAll('meta[name="theme-color"]'), function (m, i) {
       if (i === 0) { m.removeAttribute("media"); m.setAttribute("content", c); } else m.remove();
     });
   }
-  function applyTheme(t, save) {
-    var root = document.documentElement;
-    if (t === "system") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", t);
-    if (save) { try { if (t === "system") localStorage.removeItem("idos-theme"); else localStorage.setItem("idos-theme", t); } catch (e) {} }
-    Array.prototype.forEach.call(themeSheet.querySelectorAll("[data-theme-set]"), function (b) { b.setAttribute("aria-checked", b.getAttribute("data-theme-set") === t ? "true" : "false"); });
-    document.getElementById("themeValue").textContent = THEME_NAME[t];
-    syncThemeColor();
-  }
-  function openTheme() {
-    if (themeOpen) return;
-    themeOpen = true;
-    morePage.inert = true;
-    scrimEl.classList.add("is-open"); themeSheet.classList.add("is-open");
-    (themeSheet.querySelector('[aria-checked="true"]') || themeSheet.querySelector(".row")).focus({ preventScroll: true });
-  }
-  function closeTheme(quiet) {
-    if (!themeOpen) return;
-    themeOpen = false;
-    morePage.inert = false;
-    scrimEl.classList.remove("is-open"); themeSheet.classList.remove("is-open");
-    if (!quiet) document.getElementById("themeRow").focus({ preventScroll: true });
-  }
-  applyTheme(/[?&]theme=(light|dark)\b/.test(location.search) ? document.documentElement.getAttribute("data-theme") : savedTheme(), false);
-  if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { setTimeout(syncThemeColor, 0); });
-  document.getElementById("themeRow").addEventListener("click", openTheme);
-  themeSheet.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-theme-set]");
-    if (!b) return;
-    var v = b.getAttribute("data-theme-set");
-    if (v !== "cancel") applyTheme(v, true);
-    closeTheme();
+  themeSwitch.addEventListener("click", function () {
+    var t = isDark() ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem("idos-theme", t); } catch (e) {}
+    syncTheme();
   });
-  scrimEl.addEventListener("click", function () { closeTheme(); });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && themeOpen) { e.stopPropagation(); closeTheme(); } }, true);
-  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (tab) { tab.addEventListener("click", function () { closeTheme(true); }); });
+  if (darkMq) darkMq.addEventListener("change", function () { setTimeout(syncTheme, 0); });
+  syncTheme();
 
 })();
 </script>
