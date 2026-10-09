@@ -460,9 +460,11 @@ p { margin: 0; }
 .cmp-line { width: 2px; background: var(--text-primary); outline: 1px solid var(--bg-canvas); opacity: 0; transition: opacity 0.2s ease; }
 .cmp-overlay.is-open .cmp-line { opacity: 1; }
 /* the grip is the only part you can touch at rest: a tab on the edge, then a full circle while you pull it */
-.cmp-grip { position: absolute; top: 42%; left: 0; width: 44px; height: 56px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--text-primary); color: var(--text-inverse); outline: 1px solid var(--bg-canvas); pointer-events: auto; transform: translateX(-12px); transition: transform 0.25s var(--ease-page), background-color 0.2s ease; }
-.cmp-grip::before { content: ""; position: absolute; inset: -4px -4px -4px -8px; }   /* the tap target is 52 x 64 */
-.cmp-overlay.is-open .cmp-grip { transform: none; height: 44px; margin-top: 6px; background: var(--action-primary); color: var(--on-action); }
+.cmp-grip { position: absolute; top: 42%; left: 2px; width: 40px; height: 56px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--text-primary); color: var(--text-inverse); outline: 1px solid var(--bg-canvas); pointer-events: auto; transform: translateX(-10px); transition: transform 0.25s var(--ease-page), background-color 0.2s ease; }
+.cmp-grip::before { content: ""; position: absolute; inset: -4px -6px -4px -10px; }   /* the tap target is 56 x 64 */
+.cmp-overlay.is-open .cmp-grip { transform: none; height: 40px; margin-top: 8px; background: var(--action-primary); color: var(--on-action); }
+.cmp-overlay.is-full .cmp-grip { transform: translateX(10px); height: 56px; margin-top: 0; background: var(--text-primary); color: var(--text-inverse); }   /* all the way in: a clean original, the tab waits on the left edge */
+.cmp-overlay.is-full .cmp-line { opacity: 0; }
 .cmp-overlay.is-dragging .cmp-grip { transition: none; }
 .cmp-handle:focus-visible { outline: none; }
 .cmp-handle:focus-visible .cmp-grip { outline: 2px solid var(--action-primary); outline-offset: 2px; }
@@ -633,7 +635,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build aa5ccf2 -->
+  <!-- Build 277c113 -->
 </div>
 
 <script>
@@ -1520,12 +1522,13 @@ window.IDOS_TRIPS = (function () {
         : '<p class="none t-row">The original app has no screen like this one.</p>';
     }
     function set(v) {
-      rev = Math.max(0, Math.min(96, v));
+      rev = Math.max(0, Math.min(100, v));
       var open = rev > 0;
       overlay.style.setProperty("--pos", (100 - rev) + "%");
       overlay.classList.toggle("is-open", open);
+      overlay.classList.toggle("is-full", rev >= 100);
       handle.setAttribute("aria-valuenow", Math.round(rev));
-      handle.setAttribute("aria-valuetext", open ? Math.round(rev) + " percent original" : "Original hidden");
+      handle.setAttribute("aria-valuetext", rev >= 100 ? "Original only" : open ? Math.round(rev) + " percent original" : "Original hidden");
       clearInterval(timer);
       if (open) { refresh(); timer = setInterval(refresh, 350); }
       else { orig.innerHTML = ""; shown = ""; }
@@ -1542,7 +1545,8 @@ window.IDOS_TRIPS = (function () {
       if (!dragging) return;
       dragging = false; overlay.classList.remove("is-dragging");
       if (!moved) set(rev > 0 ? 0 : 50);              // tap: show half, or put it away
-      else if (rev < 6) set(0);                        // let go near the edge: rests again
+      else if (rev < 6) set(0);                        // let go near an edge: it docks there, a clean prototype or a clean original
+      else if (rev > 94) set(100);
     }
     handle.addEventListener("pointerup", end);
     handle.addEventListener("pointercancel", end);
@@ -1550,7 +1554,7 @@ window.IDOS_TRIPS = (function () {
       var step = e.shiftKey ? 25 : 5;
       if (e.key === "ArrowLeft") { set(rev + step); e.preventDefault(); }
       else if (e.key === "ArrowRight") { set(rev - step); e.preventDefault(); }
-      else if (e.key === "Home") { set(96); e.preventDefault(); }
+      else if (e.key === "Home") { set(100); e.preventDefault(); }
       else if (e.key === "End" || e.key === "Escape") { set(0); e.preventDefault(); }
     });
   })();
