@@ -235,13 +235,15 @@ var theme = (function () {
   return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 })();
 var grid = document.getElementById("grid"), cmps = [];
+// every picture comes in three widths, so the browser never shrinks a big one 3x (that is what makes small text look broken)
+function srcset(base, full) { return "compare/" + base + "-400.webp 400w, compare/" + base + "-800.webp 800w, compare/" + base + ".webp " + full + "w"; }
 
 SCREENS.forEach(function (s) {
   var fig = document.createElement("figure");
   fig.innerHTML =
     '<div class="cmp" role="slider" tabindex="0" aria-label="' + s[1] + ': reveal the original" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half original, half redesign">' +
       '<img class="after" alt="Redesign concept: ' + s[1] + '" width="1284" height="2778" loading="lazy" decoding="async">' +
-      '<img class="before" alt="Original IDOS app: ' + s[1] + '" width="1284" height="2778" loading="lazy" decoding="async" src="compare/before-' + s[0] + '.webp">' +
+      '<img class="before" alt="Original IDOS app: ' + s[1] + '" width="1284" height="2778" loading="lazy" decoding="async" sizes="(max-width: 420px) 100vw, 380px" src="compare/before-' + s[0] + '.webp" srcset="' + srcset("before-" + s[0], s[0] === "connection" ? 1183 : 1284) + '">' +
       '<span class="line"></span><span class="grip" aria-hidden="true"><svg class="ico" width="24" height="24" viewBox="0 0 256 256" fill="currentColor" focusable="false"><path d="M213.66,181.66l-32,32a8,8,0,0,1-11.32-11.32L188.69,184H48a8,8,0,0,1,0-16H188.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,213.66,181.66Zm-139.32-64a8,8,0,0,0,11.32-11.32L67.31,88H208a8,8,0,0,0,0-16H67.31L85.66,53.66A8,8,0,0,0,74.34,42.34l-32,32a8,8,0,0,0,0,11.32Z"/></svg></span>' +
       '<span class="tag l t-option">Before</span><span class="tag r t-option">After</span>' +
     '</div>' +
@@ -273,7 +275,7 @@ SCREENS.forEach(function (s) {
 
 function setTheme(t) {
   theme = t;
-  cmps.forEach(function (c) { c.after.src = "compare/after-" + t + "-" + c.key + ".webp"; });
+  cmps.forEach(function (c) { var b = "after-" + t + "-" + c.key; c.after.sizes = "(max-width: 420px) 100vw, 380px"; c.after.srcset = srcset(b, 1284); c.after.src = "compare/" + b + ".webp"; });
   Array.prototype.forEach.call(document.querySelectorAll(".theme button"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-theme") === t ? "true" : "false"); });
 }
 Array.prototype.forEach.call(document.querySelectorAll(".theme button"), function (b) { b.addEventListener("click", function () { setTheme(b.getAttribute("data-theme")); }); });

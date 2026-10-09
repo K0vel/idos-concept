@@ -181,7 +181,8 @@ body { background: var(--proto-backdrop); }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 .device { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; text-align: left; }
-button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--action-primary); outline-offset: 2px; }
+:focus-visible { outline: none; }
+:root.kbd :is(button, a, [tabindex]):focus-visible { outline: 2px solid var(--action-primary); outline-offset: 2px; }
 p { margin: 0; }
 .ico { display: block; flex: none; }
 
@@ -470,14 +471,17 @@ p { margin: 0; }
 .cmp-line { width: 2px; background: var(--text-primary); outline: 1px solid var(--bg-canvas); opacity: 0; transition: opacity 0.2s ease; }
 .cmp-overlay.is-open .cmp-line { opacity: 1; }
 /* the grip is the only part you can touch at rest: a tab on the edge, then a full circle while you pull it */
-.cmp-grip { position: absolute; top: calc(42% + 8px); left: 2px; width: 40px; height: 40px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--text-primary); color: var(--text-inverse); outline: 1px solid var(--bg-canvas); pointer-events: auto; transform: translateX(-12px); transition: transform 0.25s var(--ease-page), background-color 0.2s ease; }
-.cmp-grip::before { content: ""; position: absolute; inset: -12px -6px -12px -12px; }   /* the tap target is 58 x 64 */
-.cmp-overlay.is-open .cmp-grip { transform: none; background: var(--action-primary); color: var(--on-action); }
-.cmp-overlay.is-full .cmp-grip { transform: translateX(12px); background: var(--text-primary); color: var(--text-inverse); }   /* all the way in: a clean original, the tab waits on the left edge */
+.cmp-grip { position: absolute; top: calc(42% + 6px); left: 0; width: 44px; height: 44px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--text-primary); color: var(--text-inverse); outline: 1px solid var(--bg-canvas); pointer-events: auto; transition: transform 0.25s var(--ease-page), background-color 0.2s ease; }
+.cmp-grip::before { content: ""; position: absolute; inset: -10px -4px -10px -14px; }   /* the tap target is 62 x 64 */
+.cmp-grip > * { transition: transform 0.25s var(--ease-page); transform: translateX(-11px); }   /* at rest only the half inside the screen shows: the icon sits in it */
+.cmp-overlay.is-open .cmp-grip > * { transform: none; }
+.cmp-overlay.is-full .cmp-grip > * { transform: translateX(11px); }
+.cmp-overlay.is-open .cmp-grip { background: var(--action-primary); color: var(--on-action); }
+.cmp-overlay.is-full .cmp-grip { background: var(--text-primary); color: var(--text-inverse); }   /* all the way in: a clean original, the tab waits on the left edge */
 .cmp-overlay.is-full .cmp-line { opacity: 0; }
-.cmp-overlay.is-dragging .cmp-grip { transition: none; }
+.cmp-overlay.is-dragging .cmp-grip, .cmp-overlay.is-dragging .cmp-grip > * { transition: none; }
 .cmp-handle:focus-visible { outline: none; }
-.cmp-handle:focus-visible .cmp-grip { outline: 2px solid var(--action-primary); outline-offset: 2px; }
+:root.kbd .cmp-handle:focus-visible .cmp-grip { outline: 2px solid var(--action-primary); outline-offset: 2px; }
 
 /* ── overlay for tabs outside this concept ───────── */
 .empty-state { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-8); padding: 0 var(--margin-content); text-align: center; }
@@ -495,7 +499,7 @@ p { margin: 0; }
 /* Reduced motion is honoured, except when the page is opened with ?motion=on (screen recordings on a machine
    that has system animations switched off). */
 @media (prefers-reduced-motion: reduce) {
-  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after, .cmp-grip, .cmp-line) { transition: none; }
+  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after, .cmp-grip, .cmp-grip > *, .cmp-line) { transition: none; }
   :root:not(.motion-on) .when.is-now { animation: none; }
 }
 </style>
@@ -506,6 +510,10 @@ p { margin: 0; }
   var m = /[?&]theme=(light|dark)\b/.exec(location.search), t = m && m[1];
   if (!t) { try { t = localStorage.getItem("idos-theme"); } catch (e) {} }
   if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+  // input modality: the focus ring only shows after the keyboard was used, and goes away at the next touch or click
+  var root = document.documentElement;
+  addEventListener("keydown", function (e) { if (e.key === "Tab" || e.key.indexOf("Arrow") === 0 || e.key === "Enter" || e.key === " " || e.key === "Home" || e.key === "End") root.classList.add("kbd"); }, true);
+  addEventListener("pointerdown", function () { root.classList.remove("kbd"); }, true);
 })();
 </script>
 
@@ -648,7 +656,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build 15f7eaa -->
+  <!-- Build 360f91d -->
 </div>
 
 <script>
@@ -1511,12 +1519,18 @@ window.IDOS_TRIPS = (function () {
   (function () {
     var overlay = document.getElementById("cmpOverlay"), orig = document.getElementById("cmpOrig"), handle = document.getElementById("cmpHandle");
     var SHOT = { connection: "Connection", results: "Search results", trip: "Trip", "trip-end": "Restrictions, carriers and fare", more: "More" };
+    // the same picture in three widths: the browser takes the one that matches the screen, so small text is never shrunk 3x on the fly
+    var FULLW = { connection: 1183 };
+    function picAttrs(s) {
+      var b = "compare/before-" + s;
+      return 'src="' + b + '.webp" srcset="' + b + '-400.webp 400w, ' + b + '-800.webp 800w, ' + b + '.webp ' + (FULLW[s] || 1284) + 'w" sizes="(max-width: 520px) 100vw, 393px"';
+    }
     var rev = 0, shown = "", timer = 0, dragging = false, moved = false;   // rev: percent of the screen the original covers, 0 = at rest
     if (/[?&]fab=off\b/.test(location.search)) return;
     var probe = new Image();
     probe.onload = function () {
       overlay.hidden = false;
-      Object.keys(SHOT).forEach(function (k) { new Image().src = "compare/before-" + k + ".webp"; });   // ready before the first pull
+      Object.keys(SHOT).forEach(function (k) { var im = new Image(); im.sizes = "(max-width: 520px) 100vw, 393px"; im.srcset = "compare/before-" + k + "-400.webp 400w, compare/before-" + k + "-800.webp 800w, compare/before-" + k + ".webp " + (FULLW[k] || 1284) + "w"; im.src = "compare/before-" + k + ".webp"; });   // ready before the first pull
     };
     probe.src = "compare/before-connection.webp";
 
@@ -1531,7 +1545,7 @@ window.IDOS_TRIPS = (function () {
       var s = screenNow();
       if (s === shown && orig.firstChild) return;
       shown = s;
-      orig.innerHTML = s ? '<img src="compare/before-' + s + '.webp" alt="Original IDOS app: ' + SHOT[s] + '" width="1284" height="2778" decoding="async" draggable="false">'
+      orig.innerHTML = s ? '<img ' + picAttrs(s) + ' alt="Original IDOS app: ' + SHOT[s] + '" width="1284" height="2778" decoding="async" draggable="false">'
         : '<p class="none t-row">The original app has no screen like this one.</p>';
     }
     function set(v) {
