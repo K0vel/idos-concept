@@ -1,4 +1,4 @@
-const CACHE = "idos-5f4de9f";
+const CACHE = "idos-9c263e9";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", e => {

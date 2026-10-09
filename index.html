@@ -186,27 +186,24 @@ p { margin: 0; }
 .dot3 { flex: none; width: 3px; height: 3px; border-radius: var(--radius-full); background: var(--icon-secondary); }
 .card-head .ico { color: var(--icon-secondary); }
 
-/* Full-bleed row: the first chip sits on the 32px margin, the next one peeks in from the screen edge.
+/* Two chips fill the row exactly, so the row never scrolls and a horizontal swipe is free to switch tabs.
    Spacing between chips is a margin, not a gap, so a leaving chip can collapse to nothing. */
-.chips {
-  display: flex; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; cursor: grab;
-  padding-left: var(--margin-content); scroll-padding-left: var(--margin-content);
-  scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
-}
-.chips::-webkit-scrollbar { display: none; }
+.chips { display: flex; overflow: hidden; padding-left: var(--margin-content); }
 /* end spacer: last chip's 8px margin + 24px = the 32px margin on the right */
 .chips::after { content: ""; flex: none; width: var(--space-24); }
-.chips.is-dragging { cursor: grabbing; scroll-snap-type: none; }
 
-/* Chip width follows the screen so two chips plus a 25px peek of the third always fit:
-   393 → 160 (the Figma size), 428 (iPhone 13 Pro Max) → 177, 375 → 151. Never narrower than its content needs. */
+/* Horizontal drags belong to the tab swipe; vertical ones still scroll the list. */
+.list, .chips { touch-action: pan-y; }
+
+/* Chip width follows the screen so two chips always fill the 32px margins:
+   393 → 160.5 (Figma 160), 428 (iPhone 13 Pro Max) → 178, 375 → 151.5. */
 .device { container-type: inline-size; }
 .chip {
   flex: none; display: flex; width: 160px; height: 60px; margin-right: var(--space-8);
-  background: var(--bg-surface); border-radius: var(--radius-sm); overflow: hidden; scroll-snap-align: start;
+  background: var(--bg-surface); border-radius: var(--radius-sm); overflow: hidden;
   transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), margin-right 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
 }
-@supports (width: 1cqw) { .chip { width: clamp(148px, calc((100cqw - 73px) / 2), 200px); } }
+@supports (width: 1cqw) { .chip { width: clamp(140px, calc((100cqw - 72px) / 2), 240px); } }
 .chip.is-entering, .chip.is-leaving { width: 0; margin-right: 0; opacity: 0; }
 .chip.is-leaving { pointer-events: none; }
 
@@ -339,7 +336,7 @@ p { margin: 0; }
       <div class="elsewhere" id="elsewhere" hidden>
         <p class="t-segment-active" id="elsewhereTitle"></p>
         <p class="note t-option">Not part of this concept yet</p>
-        <p class="disclaimer">Unofficial redesign concept. Not affiliated with IDOS or CHAPS. Build 5f4de9f</p>
+        <p class="disclaimer">Unofficial redesign concept. Not affiliated with IDOS or CHAPS. Build 9c263e9</p>
       </div>
     </div>
 
@@ -383,7 +380,7 @@ window.idosIcon = function (key, size, cls) {
   document.documentElement.style.setProperty("--blink", NOW_HOLD_MS / BLINKS + "ms");
   document.documentElement.style.setProperty("--blinks", BLINKS);
   var ACTIVE_MAX_MIN = 2;   // design system: a departure this close gets the emphasised time
-  var VISIBLE = 3;          // chips per card: two in view, the third peeks in from the screen edge
+  var VISIBLE = 2;          // chips per card: they fill the row exactly, so it needs no scrolling
 
   var GLYPH = {
     "tram": ["custom:tram"], "bus": ["fill:bus"], "bus-x": ["bold:arrow-elbow-down-right", "fill:bus"],
@@ -555,43 +552,84 @@ window.idosIcon = function (key, size, cls) {
     }, NOW_HOLD_MS);
   }, TICK_MS);
 
-  // A mouse has no touch scrolling, so let it drag the chip rows.
-  var drag = null;
-  list.addEventListener("pointerdown", function (e) {
-    var row = e.pointerType === "mouse" && e.target.closest(".chips");
-    if (row) drag = { row: row, x: e.clientX, left: row.scrollLeft, moved: false };
-  });
-  window.addEventListener("pointermove", function (e) {
-    if (!drag) return;
-    var dx = e.clientX - drag.x;
-    if (!drag.moved && Math.abs(dx) < 4) return;
-    drag.moved = true;
-    drag.row.classList.add("is-dragging");
-    drag.row.scrollLeft = drag.left - dx;
-  });
-  window.addEventListener("pointerup", function () {
-    if (!drag) return;
-    var row = drag.row, moved = drag.moved;
-    drag = null;
-    row.classList.remove("is-dragging");
-    if (!moved) return;
-    function swallow(ev) { ev.stopPropagation(); ev.preventDefault(); }
-    row.addEventListener("click", swallow, true);       // a drag must not count as a tap on the chip under the cursor
-    setTimeout(function () { row.removeEventListener("click", swallow, true); }, 0);
-  });
+  var ORDER = ["fav", "recent"];
+  var segments = Array.prototype.slice.call(document.querySelectorAll(".segment"));
+  function motionOK() {
+    return document.documentElement.classList.contains("motion-on") || !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
 
-  Array.prototype.forEach.call(document.querySelectorAll(".segment"), function (seg) {
-    seg.addEventListener("click", function () {
-      tab = seg.getAttribute("data-view");
-      Array.prototype.forEach.call(document.querySelectorAll(".segment"), function (s) {
-        var on = s === seg;
-        s.setAttribute("aria-selected", on ? "true" : "false");
-        s.className = "segment " + (on ? "t-segment-active" : "t-segment");
-      });
-      list.scrollTop = 0;
-      mount();
+  // Switch tab. dir is the way the content travels: +1 means the new tab arrives from the right.
+  function setTab(name, dir) {
+    if (name === tab) return;
+    dir = dir || (ORDER.indexOf(name) > ORDER.indexOf(tab) ? 1 : -1);
+    tab = name;
+    segments.forEach(function (s) {
+      var on = s.getAttribute("data-view") === name;
+      s.setAttribute("aria-selected", on ? "true" : "false");
+      s.className = "segment " + (on ? "t-segment-active" : "t-segment");
+    });
+    list.scrollTop = 0;
+    mount();
+    if (motionOK() && list.animate) {
+      list.animate([{ transform: "translateX(" + dir * 48 + "px)", opacity: 0 }, { transform: "none", opacity: 1 }],
+        { duration: 280, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+    }
+  }
+  segments.forEach(function (seg, i) {
+    seg.addEventListener("click", function () { setTab(seg.getAttribute("data-view")); });
+    seg.addEventListener("keydown", function (e) {
+      var to = segments[i + (e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0)];
+      if (to && to !== seg) { e.preventDefault(); to.focus(); setTab(to.getAttribute("data-view")); }
     });
   });
+
+  // Swipe sideways on the list to move between Favorites and Recent. The list follows the finger, pulls back
+  // when there is nothing further that way, and commits past a distance or on a quick flick. A vertical
+  // drag is left to the browser, so the list still scrolls.
+  var swipe = null;
+  list.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    swipe = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp, dx: 0, active: false };
+  });
+  window.addEventListener("pointermove", function (e) {
+    if (!swipe || e.pointerId !== swipe.id) return;
+    var dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+    if (!swipe.active) {
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      if (Math.abs(dx) < Math.abs(dy) * 1.4) { swipe = null; return; }
+      swipe.active = true;
+    }
+    var next = ORDER[ORDER.indexOf(tab) + (dx < 0 ? 1 : -1)];
+    swipe.dx = next ? dx : dx * 0.25;
+    list.style.transform = "translateX(" + swipe.dx + "px)";
+  });
+  function endSwipe(e, cancelled) {
+    if (!swipe || e.pointerId !== swipe.id) return;
+    var s = swipe;
+    swipe = null;
+    if (!s.active) return;
+    var eat = function (ev) { ev.stopPropagation(); ev.preventDefault(); };   // a drag must not tap what is under the cursor
+    window.addEventListener("click", eat, true);
+    setTimeout(function () { window.removeEventListener("click", eat, true); }, 0);
+
+    var dir = s.dx < 0 ? 1 : -1, next = ORDER[ORDER.indexOf(tab) + dir];
+    var far = Math.abs(s.dx) > Math.min(96, list.clientWidth * 0.22);
+    var flick = Math.abs(s.dx) > 24 && Math.abs(s.dx) / Math.max(1, e.timeStamp - s.t) > 0.5;
+    list.style.transform = "";
+    if (!cancelled && next && (far || flick)) {
+      if (motionOK() && list.animate) {
+        var out = list.animate([{ transform: "translateX(" + s.dx + "px)", opacity: 1 }, { transform: "translateX(" + -dir * 60 + "px)", opacity: 0 }],
+          { duration: 120, easing: "ease-in", fill: "forwards" });
+        out.onfinish = function () { out.cancel(); setTab(next, dir); };
+      } else {
+        setTab(next, dir);
+      }
+    } else if (list.animate) {
+      list.animate([{ transform: "translateX(" + s.dx + "px)" }, { transform: "none" }], { duration: 220, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+    }
+  }
+  window.addEventListener("pointerup", function (e) { endSwipe(e, false); });
+  window.addEventListener("pointercancel", function (e) { endSwipe(e, true); });
 
   // Origin and destination are real text fields. Focusing one selects its value so typing replaces it;
   // Enter on the first moves to the second, Enter on the second (or Search) closes the keyboard.
