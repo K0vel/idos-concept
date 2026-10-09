@@ -324,7 +324,9 @@ p { margin: 0; }
 .cta:active { background: var(--action-primary-pressed); }
 
 /* ── tab bar ──────────────────────────────────────── */
-.tabbar { flex: none; display: flex; height: 56px; margin: var(--gap-section) var(--margin-content) 0; }
+.tabbar { flex: none; display: flex; height: 56px; margin: var(--gap-section) var(--margin-content) 0; overflow: hidden; transition: height 0.4s cubic-bezier(0.3, 0.6, 0.35, 1), margin-top 0.4s cubic-bezier(0.3, 0.6, 0.35, 1), opacity 0.25s ease; }
+/* second-order pages (search results, one trip) have no tab bar: it folds away as the page slides in, and the page takes its room */
+.device.is-deep .tabbar { height: 0; margin-top: 0; opacity: 0; }
 /* Tab item, State = Default | Active (Figma set 61:1161) */
 .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--space-4); padding-top: var(--space-2); }
 .tab .frame { position: relative; width: 32px; height: 32px; }
@@ -509,7 +511,7 @@ p { margin: 0; }
 /* Reduced motion is honoured, except when the page is opened with ?motion=on (screen recordings on a machine
    that has system animations switched off). */
 @media (prefers-reduced-motion: reduce) {
-  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after, .cmp-grip, .cmp-line, .cmp-tag) { transition: none; }
+  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after, .cmp-grip, .cmp-line, .cmp-tag, .tabbar) { transition: none; }
   :root:not(.motion-on) .when.is-now { animation: none; }
 }
 </style>
@@ -668,7 +670,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build 3b8dafc -->
+  <!-- Build 03bb4ac -->
 </div>
 
 <script>
@@ -1212,6 +1214,12 @@ window.IDOS_TRIPS = (function () {
     if (!data) { toast("Trip details are not part of this concept yet"); return; }
     openTrip({ routeId: routeId, t: t, data: data, day: data.day == null ? 621 : data.day, key: routeId + ":" + idx + ":" + t, title: r.from + " to " + r.to }, from);
   }
+  var deviceEl = document.querySelector(".device"), tabbarEl = document.querySelector(".tabbar");
+  function syncDeep() {
+    var deep = !!(current || res);
+    deviceEl.classList.toggle("is-deep", deep);
+    tabbarEl.inert = deep;
+  }
   function openTrip(c, from) {
     current = c;
     origin = from;
@@ -1222,6 +1230,7 @@ window.IDOS_TRIPS = (function () {
     connectionEls.forEach(function (el) { el.inert = true; });
     resultsEl.inert = true;
     tripEl.classList.add("is-open");
+    syncDeep();
     document.getElementById("tripBack").focus({ preventScroll: true });
   }
   function closeTrip() {
@@ -1231,6 +1240,7 @@ window.IDOS_TRIPS = (function () {
     if (res) resultsEl.inert = false; else connectionEls.forEach(function (el) { el.inert = false; });
     var back = origin;
     current = null; origin = null;
+    syncDeep();
     if (back && back.isConnected && !back.classList.contains("is-leaving")) back.focus({ preventScroll: true });
     else if (res) document.getElementById("resBack").focus({ preventScroll: true });
   }
@@ -1434,6 +1444,7 @@ window.IDOS_TRIPS = (function () {
     connectionEls.forEach(function (el) { el.inert = true; });
     resultsEl.inert = false;
     resultsEl.classList.add("is-open");
+    syncDeep();
     document.getElementById("resBack").focus({ preventScroll: true });
   }
   function closeResults() {
@@ -1444,6 +1455,7 @@ window.IDOS_TRIPS = (function () {
     connectionEls.forEach(function (el) { el.inert = false; });
     var back = res.origin;
     res = null;
+    syncDeep();
     if (back && back.isConnected) back.focus({ preventScroll: true });
   }
 
