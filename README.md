@@ -24,3 +24,4 @@ Frozen copies of a build, for showing a version to a team while the main link ke
 
 - [v1](https://k0vel.github.io/idos-concept/v1/): 09.10, content matched to the original app screenshots, compare slider with auto-glide.
 - [v2](https://k0vel.github.io/idos-concept/v2/): 09.10, later: no tab bar on results and trip, softer compare handle, the "now" blink also with reduced motion.
+- [v3](https://k0vel.github.io/idos-concept/v3/): 09.10, later: search-field placeholders are lighter, typed text stays dark.
