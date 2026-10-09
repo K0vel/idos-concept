@@ -467,10 +467,10 @@ p { margin: 0; }
   .cmp-orig img { position: absolute; left: 0; top: calc(-10.98vw + env(safe-area-inset-top, 0px)); width: 100%; height: auto; }   /* 47 / 428 of the width: the screenshot's own status bar */
 }
 /* while the handle is somewhere in the middle, say which side is which; the tags go away at both ends so the screens stay clean */
-.cmp-tag { position: absolute; top: calc(42% + 15px); z-index: 1; padding: var(--space-4) var(--space-8); border-radius: var(--radius-sm); background: var(--text-primary); color: var(--text-inverse); pointer-events: none; opacity: 0; transition: opacity 0.2s ease; }
-.cmp-tag-after { right: calc(100% - var(--pos) + 30px); }   /* left of the handle, travelling with it */
-.cmp-tag-before { left: calc(var(--pos) + 30px); }          /* right of the handle */
-.cmp-overlay.show-after .cmp-tag-after, .cmp-overlay.show-before .cmp-tag-before { opacity: 1; }
+.cmp-tag { position: absolute; top: calc(42% + 15px); z-index: 1; line-height: 26px; color: var(--text-primary); -webkit-text-stroke: 4px var(--bg-canvas); paint-order: stroke fill; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; }   /* plain text with a halo of the background colour, so it reads over anything */
+.cmp-tag-after { right: calc(100% - var(--pos) + 28px); }   /* left of the handle, travelling with it */
+.cmp-tag-before { left: calc(var(--pos) + 28px); }          /* right of the handle */
+.cmp-overlay.tags-live.show-after .cmp-tag-after, .cmp-overlay.tags-live.show-before .cmp-tag-before { opacity: 1; }   /* only while the handle moves, and a moment after */
 .cmp-hint { position: absolute; z-index: 2; width: 240px; padding: var(--space-12) var(--space-16); border-radius: var(--radius-sm); background: var(--text-primary); color: var(--text-inverse); pointer-events: none; }
 .cmp-hint[hidden] { display: none; }
 .cmp-overlay.dark-shot .cmp-orig { background: #000; }   /* the dark original: its tab bar colour */
@@ -666,7 +666,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build c6f526a -->
+  <!-- Build f078aa1 -->
 </div>
 
 <script>
@@ -1536,7 +1536,7 @@ window.IDOS_TRIPS = (function () {
       var b = "compare/before-" + s;
       return 'src="' + b + '.webp" srcset="' + b + '-393.webp 393w, ' + b + '-590.webp 590w, ' + b + '-786.webp 786w, ' + b + '.webp ' + (FULLW[s] || 1284) + 'w" sizes="(max-width: 520px) 100vw, 393px"';
     }
-    var rev = 0, shown = "", timer = 0, dragging = false, moved = false;   // rev: percent of the screen the original covers, 0 = at rest
+    var rev = 0, shown = "", timer = 0, tagTimer = 0, dragging = false, moved = false;   // rev: percent of the screen the original covers, 0 = at rest
     if (/[?&]fab=off\b/.test(location.search)) return;
     var probe = new Image();
     probe.onload = function () {
@@ -1568,6 +1568,9 @@ window.IDOS_TRIPS = (function () {
       overlay.classList.toggle("is-full", rev >= 100);
       overlay.classList.toggle("show-before", rev >= 26 && rev < 100);   // a tag needs about 100px beside the handle
       overlay.classList.toggle("show-after", rev > 0 && rev <= 74);
+      overlay.classList.add("tags-live");
+      clearTimeout(tagTimer);
+      tagTimer = setTimeout(function () { overlay.classList.remove("tags-live"); }, 1400);
       handle.setAttribute("aria-valuenow", Math.round(rev));
       handle.setAttribute("aria-valuetext", rev >= 100 ? "Original only" : open ? Math.round(rev) + " percent original" : "Original hidden");
       clearInterval(timer);
