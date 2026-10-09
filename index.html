@@ -466,6 +466,11 @@ p { margin: 0; }
   .cmp-orig { background: #F7F7F7; }   /* the original tab bar colour: if a phone is a few pixels taller than the screenshot, the strip reads as the tab bar */
   .cmp-orig img { position: absolute; left: 0; top: calc(-10.98vw + env(safe-area-inset-top, 0px)); width: 100%; height: auto; }   /* 47 / 428 of the width: the screenshot's own status bar */
 }
+/* while the handle is somewhere in the middle, say which side is which; the tags go away at both ends so the screens stay clean */
+.cmp-tag { position: absolute; top: calc(42% + 15px); z-index: 1; padding: var(--space-4) var(--space-8); border-radius: var(--radius-sm); background: var(--text-primary); color: var(--text-inverse); pointer-events: none; opacity: 0; transition: opacity 0.2s ease; }
+.cmp-tag-after { right: calc(100% - var(--pos) + 30px); }   /* left of the handle, travelling with it */
+.cmp-tag-before { left: calc(var(--pos) + 30px); }          /* right of the handle */
+.cmp-overlay.show-after .cmp-tag-after, .cmp-overlay.show-before .cmp-tag-before { opacity: 1; }
 .cmp-hint { position: absolute; z-index: 2; width: 240px; padding: var(--space-12) var(--space-16); border-radius: var(--radius-sm); background: var(--text-primary); color: var(--text-inverse); pointer-events: none; }
 .cmp-hint[hidden] { display: none; }
 .cmp-overlay.dark-shot .cmp-orig { background: #000; }   /* the dark original: its tab bar colour */
@@ -502,7 +507,7 @@ p { margin: 0; }
 /* Reduced motion is honoured, except when the page is opened with ?motion=on (screen recordings on a machine
    that has system animations switched off). */
 @media (prefers-reduced-motion: reduce) {
-  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after, .cmp-grip, .cmp-line) { transition: none; }
+  :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after, .cmp-grip, .cmp-line, .cmp-tag) { transition: none; }
   :root:not(.motion-on) .when.is-now { animation: none; }
 }
 </style>
@@ -654,13 +659,14 @@ p { margin: 0; }
     <div class="home-zone"><span class="sys"></span></div>
     <div class="cmp-overlay" id="cmpOverlay" hidden>
       <div class="cmp-orig" id="cmpOrig"></div>
+      <span class="cmp-tag cmp-tag-after t-option" aria-hidden="true">After</span><span class="cmp-tag cmp-tag-before t-option" aria-hidden="true">Before</span>
       <div class="cmp-hint t-row-meta" id="cmpHint" role="status" hidden></div>
       <div class="cmp-handle" id="cmpHandle" role="slider" tabindex="0" aria-label="Before and after: drag left to reveal the original IDOS screen" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Original hidden">
         <span class="cmp-line"></span><span class="cmp-grip"><span data-icon="regular:caret-left" data-size="20"></span><span data-icon="regular:caret-right" data-size="20"></span></span>
       </div>
     </div>
   </div>
-  <!-- Build 74658d1 -->
+  <!-- Build c6f526a -->
 </div>
 
 <script>
@@ -1528,16 +1534,16 @@ window.IDOS_TRIPS = (function () {
     var HAVE_DARK = { connection: 1, results: 1, trip: 1, more: 1, tickets: 1 };   // the original app has a dark theme too; these screens exist in it
     function picAttrs(s) {
       var b = "compare/before-" + s;
-      return 'src="' + b + '.webp" srcset="' + b + '-400.webp 400w, ' + b + '-800.webp 800w, ' + b + '.webp ' + (FULLW[s] || 1284) + 'w" sizes="(max-width: 520px) 100vw, 393px"';
+      return 'src="' + b + '.webp" srcset="' + b + '-393.webp 393w, ' + b + '-590.webp 590w, ' + b + '-786.webp 786w, ' + b + '.webp ' + (FULLW[s] || 1284) + 'w" sizes="(max-width: 520px) 100vw, 393px"';
     }
     var rev = 0, shown = "", timer = 0, dragging = false, moved = false;   // rev: percent of the screen the original covers, 0 = at rest
     if (/[?&]fab=off\b/.test(location.search)) return;
     var probe = new Image();
     probe.onload = function () {
       overlay.hidden = false;
-      Object.keys(SHOT).concat(Object.keys(HAVE_DARK).map(function (k) { return "dark-" + k; })).forEach(function (k) { var im = new Image(); im.sizes = "(max-width: 520px) 100vw, 393px"; im.srcset = "compare/before-" + k + "-400.webp 400w, compare/before-" + k + "-800.webp 800w, compare/before-" + k + ".webp " + (FULLW[k] || 1284) + "w"; im.src = "compare/before-" + k + ".webp"; });   // ready before the first pull
+      Object.keys(SHOT).concat(Object.keys(HAVE_DARK).map(function (k) { return "dark-" + k; })).forEach(function (k) { var im = new Image(); im.sizes = "(max-width: 520px) 100vw, 393px"; im.srcset = "compare/before-" + k + "-393.webp 393w, compare/before-" + k + "-590.webp 590w, compare/before-" + k + "-786.webp 786w, compare/before-" + k + ".webp " + (FULLW[k] || 1284) + "w"; im.src = "compare/before-" + k + ".webp"; });   // ready before the first pull
     };
-    probe.src = "compare/before-connection-400.webp";   // the small one: loading the full picture here would make the browser reuse it everywhere
+    probe.src = "compare/before-connection-393.webp";   // the small one: loading the full picture here would make the browser reuse it everywhere
 
     function screenNow() {
       if (tripEl.classList.contains("is-open")) return tripScroll.scrollTop > 120 ? "trip-end" : "trip";
@@ -1560,6 +1566,8 @@ window.IDOS_TRIPS = (function () {
       overlay.style.setProperty("--pos", (100 - rev) + "%");
       overlay.classList.toggle("is-open", open);
       overlay.classList.toggle("is-full", rev >= 100);
+      overlay.classList.toggle("show-before", rev >= 26 && rev < 100);   // a tag needs about 100px beside the handle
+      overlay.classList.toggle("show-after", rev > 0 && rev <= 74);
       handle.setAttribute("aria-valuenow", Math.round(rev));
       handle.setAttribute("aria-valuetext", rev >= 100 ? "Original only" : open ? Math.round(rev) + " percent original" : "Original hidden");
       clearInterval(timer);

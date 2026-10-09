@@ -178,8 +178,8 @@ h1 { font: 600 28px/32px var(--font-ui); letter-spacing: -0.5px; }
 .theme button { min-height: var(--tap-min); color: var(--text-secondary); border-bottom: 2px solid transparent; }
 .theme button[aria-pressed="true"] { color: var(--text-primary); border-bottom-color: var(--border-strong); }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: var(--space-32) var(--space-24); }
-figure { margin: 0; display: flex; flex-direction: column; gap: var(--space-12); max-width: 380px; width: 100%; justify-self: center; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-32) var(--space-24); }
+figure { margin: 0; display: flex; flex-direction: column; gap: var(--space-12); max-width: 393px; width: 100%; justify-self: center; }
 figcaption { display: flex; flex-direction: column; gap: var(--space-4); }
 figcaption .t-place-strong { font-size: 16px; line-height: 22px; }
 figcaption .note { color: var(--text-secondary); }
@@ -239,14 +239,14 @@ var grid = document.getElementById("grid"), cmps = [];
 // every picture comes in three widths, so the browser never shrinks a big one 3x (that is what makes small text look broken)
 var BEFORE_W = { connection: 1183, results: 1183, trip: 1183, tickets: 1183, "dark-connection": 1183, "dark-results": 1183, "dark-trip": 1183, "dark-more": 1183, "dark-tickets": 1183 };
 var BEFORE_DARK = { connection: 1, results: 1, trip: 1, more: 1, tickets: 1 };   // the original app has a dark theme, but no dark "trip end" screenshot
-function srcset(base, full) { return "compare/" + base + "-400.webp 400w, compare/" + base + "-800.webp 800w, compare/" + base + ".webp " + full + "w"; }
+function srcset(base, full) { return "compare/" + base + "-393.webp 393w, compare/" + base + "-590.webp 590w, compare/" + base + "-786.webp 786w, compare/" + base + ".webp " + full + "w"; }
 
 SCREENS.forEach(function (s) {
   var fig = document.createElement("figure");
   fig.innerHTML =
     '<div class="cmp" role="slider" tabindex="0" aria-label="' + s[1] + ': reveal the original" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half original, half redesign">' +
       '<img class="after" alt="Redesign concept: ' + s[1] + '" width="1284" height="2778" loading="lazy" decoding="async">' +
-      '<img class="before" alt="Original IDOS app: ' + s[1] + '" width="1284" height="2778" loading="lazy" decoding="async" sizes="(max-width: 420px) 100vw, 380px" src="compare/before-' + s[0] + '.webp" srcset="' + srcset("before-" + s[0], BEFORE_W[s[0]] || 1284) + '">' +
+      '<img class="before" alt="Original IDOS app: ' + s[1] + '" width="1284" height="2778" loading="lazy" decoding="async" sizes="(max-width: 440px) 100vw, 393px" src="compare/before-' + s[0] + '.webp" srcset="' + srcset("before-" + s[0], BEFORE_W[s[0]] || 1284) + '">' +
       '<span class="line"></span><span class="grip" aria-hidden="true"><svg class="ico" width="28" height="28" viewBox="0 0 256 256" fill="currentColor" focusable="false"><path transform="translate(-64 0)" d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/><path transform="translate(64 0)" d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></span>' +
       '<span class="tag l t-option">Before</span><span class="tag r t-option">After</span>' +
     '</div>' +
@@ -278,9 +278,9 @@ SCREENS.forEach(function (s) {
 
 function setTheme(t) {
   theme = t;
-  cmps.forEach(function (c) { var b = "after-" + t + "-" + c.key; c.after.sizes = "(max-width: 420px) 100vw, 380px"; c.after.srcset = srcset(b, 1284); c.after.src = "compare/" + b + ".webp";
+  cmps.forEach(function (c) { var b = "after-" + t + "-" + c.key; c.after.sizes = "(max-width: 440px) 100vw, 393px"; c.after.srcset = srcset(b, 1284); c.after.src = "compare/" + b + ".webp";
     var o = (t === "dark" && BEFORE_DARK[c.key] ? "before-dark-" : "before-") + c.key;     // the original in the same theme where we have it
-    c.before.sizes = "(max-width: 420px) 100vw, 380px"; c.before.srcset = srcset(o, BEFORE_W[o.replace("before-", "")] || 1284); c.before.src = "compare/" + o + ".webp"; });
+    c.before.sizes = "(max-width: 440px) 100vw, 393px"; c.before.srcset = srcset(o, BEFORE_W[o.replace("before-", "")] || 1284); c.before.src = "compare/" + o + ".webp"; });
   Array.prototype.forEach.call(document.querySelectorAll(".theme button"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-theme") === t ? "true" : "false"); });
 }
 Array.prototype.forEach.call(document.querySelectorAll(".theme button"), function (b) { b.addEventListener("click", function () { setTheme(b.getAttribute("data-theme")); }); });
