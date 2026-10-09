@@ -227,6 +227,7 @@ var SCREENS = [
   ["results", "Search results", "One white card per connection. Times, platforms and status share one grid, so options can be compared by eye."],
   ["trip", "Trip", "Every leg follows one pattern: line, direction, stops, status. Actions stay in one row under the back button."],
   ["trip-end", "Restrictions, carriers, fare", "Three plain sections instead of banded lists, all in the same two text sizes."],
+  ["tickets", "Tickets", "An empty state that says what is missing and gives the one next step, a button to buy a ticket."],
   ["more", "More", "Same entries, one line-icon style at one weight, and a dark-theme switch right in the list."]
 ];
 var theme = (function () {
@@ -236,8 +237,8 @@ var theme = (function () {
 })();
 var grid = document.getElementById("grid"), cmps = [];
 // every picture comes in three widths, so the browser never shrinks a big one 3x (that is what makes small text look broken)
-var BEFORE_W = { connection: 1183, results: 1183, trip: 1183, "dark-connection": 1183, "dark-results": 1183, "dark-trip": 1183, "dark-more": 1183 };
-var BEFORE_DARK = { connection: 1, results: 1, trip: 1, more: 1 };   // the original app has a dark theme, but no dark "trip end" screenshot
+var BEFORE_W = { connection: 1183, results: 1183, trip: 1183, tickets: 1183, "dark-connection": 1183, "dark-results": 1183, "dark-trip": 1183, "dark-more": 1183, "dark-tickets": 1183 };
+var BEFORE_DARK = { connection: 1, results: 1, trip: 1, more: 1, tickets: 1 };   // the original app has a dark theme, but no dark "trip end" screenshot
 function srcset(base, full) { return "compare/" + base + "-400.webp 400w, compare/" + base + "-800.webp 800w, compare/" + base + ".webp " + full + "w"; }
 
 SCREENS.forEach(function (s) {
@@ -246,7 +247,7 @@ SCREENS.forEach(function (s) {
     '<div class="cmp" role="slider" tabindex="0" aria-label="' + s[1] + ': reveal the original" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half original, half redesign">' +
       '<img class="after" alt="Redesign concept: ' + s[1] + '" width="1284" height="2778" loading="lazy" decoding="async">' +
       '<img class="before" alt="Original IDOS app: ' + s[1] + '" width="1284" height="2778" loading="lazy" decoding="async" sizes="(max-width: 420px) 100vw, 380px" src="compare/before-' + s[0] + '.webp" srcset="' + srcset("before-" + s[0], BEFORE_W[s[0]] || 1284) + '">' +
-      '<span class="line"></span><span class="grip" aria-hidden="true"><svg class="ico" width="24" height="24" viewBox="0 0 256 256" fill="currentColor" focusable="false"><path d="M213.66,181.66l-32,32a8,8,0,0,1-11.32-11.32L188.69,184H48a8,8,0,0,1,0-16H188.69l-18.35-18.34a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,213.66,181.66Zm-139.32-64a8,8,0,0,0,11.32-11.32L67.31,88H208a8,8,0,0,0,0-16H67.31L85.66,53.66A8,8,0,0,0,74.34,42.34l-32,32a8,8,0,0,0,0,11.32Z"/></svg></span>' +
+      '<span class="line"></span><span class="grip" aria-hidden="true"><svg class="ico" width="28" height="28" viewBox="0 0 256 256" fill="currentColor" focusable="false"><path transform="translate(-64 0)" d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/><path transform="translate(64 0)" d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></span>' +
       '<span class="tag l t-option">Before</span><span class="tag r t-option">After</span>' +
     '</div>' +
     '<figcaption><h2 class="t-place-strong">' + s[1] + '</h2><p class="note t-row-meta">' + s[2] + '</p></figcaption>';
