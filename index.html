@@ -512,7 +512,7 @@ p { margin: 0; }
    that has system animations switched off). */
 @media (prefers-reduced-motion: reduce) {
   :root:not(.motion-on) :is(.swap .ico, .pressable, .tab .frame .ico, .tab .t-nav, .chip, .track, .indicator, .segment, .row, .trip, .scrim, .sheet, .toast, .via, .via-toggle .ico, .icon-btn, .result, .later, .switch, .switch::after, .cmp-grip, .cmp-line, .cmp-tag, .tabbar) { transition: none; }
-  :root:not(.motion-on) .when.is-now { animation: none; }
+  /* "now" still blinks: it is a slow change of opacity, not movement, and it is the live part of the concept */
 }
 </style>
 </head>
@@ -670,7 +670,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build c159ced -->
+  <!-- Build b757c34 -->
 </div>
 
 <script>
