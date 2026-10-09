@@ -454,6 +454,12 @@ p { margin: 0; }
 .cmp-orig { position: absolute; inset: 0; background: var(--bg-canvas); clip-path: inset(0 0 0 var(--pos)); pointer-events: none; }
 .cmp-overlay.is-open .cmp-orig { pointer-events: auto; }
 .cmp-orig img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+@media (max-width: 520px) {
+  /* on a phone the slider covers the whole window, including the strip above the home indicator that the device frame leaves free */
+  .cmp-overlay { position: fixed; }
+  .cmp-orig { background: #F7F7F7; }   /* the original tab bar colour: if a phone is a few pixels taller than the screenshot, the strip reads as the tab bar */
+  .cmp-orig img { position: absolute; left: 0; top: calc(-10.98vw + env(safe-area-inset-top, 0px)); width: 100%; height: auto; }   /* 47 / 428 of the width: the screenshot's own status bar */
+}
 .cmp-orig .none { position: absolute; right: var(--margin-content); top: 40%; width: 200px; color: var(--text-secondary); }
 .cmp-handle { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 44px; margin-left: -22px; pointer-events: none; touch-action: none; cursor: ew-resize; display: flex; justify-content: center; }
 .cmp-overlay.is-open .cmp-handle { pointer-events: auto; }
@@ -635,7 +641,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build 277c113 -->
+  <!-- Build d507265 -->
 </div>
 
 <script>
@@ -1538,6 +1544,7 @@ window.IDOS_TRIPS = (function () {
     handle.addEventListener("pointermove", function (e) {
       if (!dragging) return;
       var v = at(e);
+      if (v > 93) v = 100; else if (v < 7) v = 0;     // a finger cannot touch the very edge of the glass, so the last 7% docks while you drag
       if (!moved && Math.abs(v - rev) < 2) return;    // a tap is not a drag
       moved = true; overlay.classList.add("is-dragging"); set(v);
     });
