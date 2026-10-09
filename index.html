@@ -309,7 +309,7 @@ p { margin: 0; }
 .field .value::placeholder { color: var(--text-secondary); opacity: 1; }
 .field:focus-within .value { color: var(--text-primary); }
 .swap {
-  position: absolute; top: 36px; right: 48px; width: 40px; height: 40px; border-radius: var(--radius-full);
+  position: absolute; top: 36px; right: 38px; width: 40px; height: 40px; border-radius: var(--radius-full);   /* 10px closer to the edge than before: a long stop name no longer reaches it, and 16px would run into the map icon */
   display: flex; align-items: center; justify-content: center;
   background: var(--bg-surface); box-shadow: inset 0 0 0 1px var(--border-subtle); color: var(--icon-secondary);
 }
@@ -670,7 +670,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build 03bb4ac -->
+  <!-- Build 0d1d593 -->
 </div>
 
 <script>
