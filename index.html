@@ -670,7 +670,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build 0d1d593 -->
+  <!-- Build f689e2e -->
 </div>
 
 <script>
@@ -1612,15 +1612,16 @@ window.IDOS_TRIPS = (function () {
     // a slow drag by which side of the middle it was let go on. Both ends are clean screens, so there is no resting place in between.
     var samples = [], glideFrame = 0;
     function stopGlide() { cancelAnimationFrame(glideFrame); overlay.classList.remove("is-dragging"); }
-    function glide(target) {
+    function glide(target, v0) {
       stopGlide();
-      var from = rev, start = performance.now(), reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches && !document.documentElement.classList.contains("motion-on");
+      var from = rev, start = performance.now(), dist = target - from, dir = dist < 0 ? -1 : 1, reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches && !document.documentElement.classList.contains("motion-on");
       if (reduce || from === target) { set(target); return; }
-      var dur = 180 + 160 * Math.abs(target - from) / 100;    // 180 to 340 ms, longer for a longer way
-      overlay.classList.add("is-dragging");                   // no CSS transitions while the script drives it
+      var dur = 340 + 260 * Math.abs(dist) / 100;                          // 340 to 600 ms
+      var m0 = Math.min(Math.max(0, (v0 || 0) * dir) * dur, 1.1 * Math.abs(dist)) * dir;   // carry the finger's speed in, only towards the target, never a lunge
+      overlay.classList.add("is-dragging");                                // no CSS transitions while the script drives it
       (function step(now) {
-        var p = Math.min(1, (now - start) / dur), eased = 1 - Math.pow(1 - p, 3);
-        set(from + (target - from) * eased);
+        var p = Math.min(1, (now - start) / dur), p2 = p * p, p3 = p2 * p;
+        set((2 * p3 - 3 * p2 + 1) * from + (p3 - 2 * p2 + p) * m0 + (-2 * p3 + 3 * p2) * target);   // cubic Hermite: starts at the finger's speed, ends at rest
         if (p < 1) glideFrame = requestAnimationFrame(step); else { set(target); overlay.classList.remove("is-dragging"); }
       })(start);
     }
@@ -1647,7 +1648,7 @@ window.IDOS_TRIPS = (function () {
     handle.addEventListener("pointermove", function (e) {
       if (!dragging) return;
       var v = at(e);
-      if (v > 93) v = 100; else if (v < 7) v = 0;     // a finger cannot touch the very edge of the glass, so the last 7% docks while you drag
+      v = Math.max(0, Math.min(100, (v - 7) * 100 / 86));   // a finger cannot touch the very edge of the glass: its 7%..93% span carries the handle over 0..100, with no jump
       if (!moved && Math.abs(v - rev) < 2) return;    // a tap is not a drag
       moved = true; overlay.classList.add("is-dragging"); set(v);
       samples.push({ t: performance.now(), v: rev }); if (samples.length > 8) samples.shift();
@@ -1655,9 +1656,9 @@ window.IDOS_TRIPS = (function () {
     function end() {
       if (!dragging) return;
       dragging = false; overlay.classList.remove("is-dragging");
-      if (!moved) { glide(rev > 0 ? 0 : 100); return; }                     // a tap: all the way in, or all the way out
+      if (!moved) { glide(rev > 0 ? 0 : 100, 0); return; }                     // a tap: all the way in, or all the way out
       var vel = samples.length > 1 ? velocity() : 0;
-      glide(Math.abs(vel) > 0.04 ? (vel > 0 ? 100 : 0) : (rev >= 50 ? 100 : 0));
+      glide(Math.abs(vel) > 0.04 ? (vel > 0 ? 100 : 0) : (rev >= 50 ? 100 : 0), vel);
     }
     handle.addEventListener("pointerup", end);
     handle.addEventListener("pointercancel", end);
