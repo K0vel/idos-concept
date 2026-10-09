@@ -23,3 +23,4 @@ Icons: [Phosphor Icons](https://phosphoricons.com) (MIT) plus custom IDOS glyphs
 Frozen copies of a build, for showing a version to a team while the main link keeps changing. Made with `idos-snapshot.js` (in the portfolio repo, cases/idos).
 
 - [v1](https://k0vel.github.io/idos-concept/v1/): 09.10, content matched to the original app screenshots, compare slider with auto-glide.
+- [v2](https://k0vel.github.io/idos-concept/v2/): 09.10, later: no tab bar on results and trip, softer compare handle, the "now" blink also with reduced motion.
