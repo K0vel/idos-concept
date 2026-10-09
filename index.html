@@ -75,6 +75,7 @@ body { margin: 0; }
   --line-metro-a: var(--green-600);
   --line-metro-b: var(--yellow-500);
   --line-metro-c: var(--red-500);
+  --line-trol: var(--green-600);
   --on-line: var(--neutral-0);
   --on-line-metro-b: var(--neutral-1000);   /* the only dark-on-colour badge */
 
@@ -287,6 +288,7 @@ p { margin: 0; }
 :is(.badge, .line-tag)[data-line="metro-a"] { background: var(--line-metro-a); }
 :is(.badge, .line-tag)[data-line="metro-b"] { background: var(--line-metro-b); color: var(--on-line-metro-b); }
 :is(.badge, .line-tag)[data-line="metro-c"] { background: var(--line-metro-c); }
+:is(.badge, .line-tag)[data-line="trol"] { background: var(--line-trol); }
 
 .chip-info { display: flex; flex-direction: column; justify-content: center; gap: var(--space-4); min-width: 0; padding: 0 var(--space-16) var(--space-4) var(--space-10); }
 .chip-info .when { white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -529,7 +531,7 @@ p { margin: 0; }
   <div class="device">
     <div class="statusbar sys" aria-hidden="true">
       <span class="island"></span>
-      <span class="time">9:41</span>
+      <span class="time">10:21</span>
       <span class="levels">
         <svg width="19.2" height="12.23" viewBox="0 0 19.2 12.2264" fill="currentColor"><path fill-rule="evenodd" d="M19.2 1.14623 C19.2 0.513183 18.7224 0 18.1333 0 L17.0667 0 C16.4776 0 16 0.513183 16 1.14623 L16 11.0802 C16 11.7132 16.4776 12.2264 17.0667 12.2264 L18.1333 12.2264 C18.7224 12.2264 19.2 11.7132 19.2 11.0802 L19.2 1.14623 Z M11.7659 2.44528 L12.8326 2.44528 C13.4217 2.44528 13.8992 2.97078 13.8992 3.61902 L13.8992 11.0527 C13.8992 11.7009 13.4217 12.2264 12.8326 12.2264 L11.7659 12.2264 C11.1768 12.2264 10.6992 11.7009 10.6992 11.0527 L10.6992 3.61902 C10.6992 2.97078 11.1768 2.44528 11.7659 2.44528 Z M7.43411 5.09433 L6.36745 5.09433 C5.77834 5.09433 5.30078 5.62652 5.30078 6.28301 L5.30078 11.0377 C5.30078 11.6942 5.77834 12.2264 6.36745 12.2264 L7.43411 12.2264 C8.02322 12.2264 8.50078 11.6942 8.50078 11.0377 L8.50078 6.28301 C8.50078 5.62652 8.02322 5.09433 7.43411 5.09433 Z M2.13333 7.53962 L1.06667 7.53962 C0.477563 7.53962 0 8.06421 0 8.71132 L0 11.0547 C0 11.7018 0.477563 12.2264 1.06667 12.2264 L2.13333 12.2264 C2.72244 12.2264 3.2 11.7018 3.2 11.0547 L3.2 8.71132 C3.2 8.06421 2.72244 7.53962 2.13333 7.53962 Z"/></svg>
         <svg width="17.14" height="12.33" viewBox="0 0 17.1417 12.3283" fill="currentColor"><path fill-rule="evenodd" d="M8.5713 2.46628 C11.0584 2.46639 13.4504 3.38847 15.2529 5.04195 C15.3887 5.1696 15.6056 5.16799 15.7393 5.03834 L17.0368 3.77487 C17.1045 3.70911 17.1422 3.62004 17.1417 3.52735 C17.1411 3.43467 17.1023 3.34603 17.0338 3.28104 C12.3028 -1.09368 4.83907 -1.09368 0.108056 3.28104 C0.039524 3.34598 0.000639766 3.4346 7.82398e-06 3.52728 C-0.000624118 3.61996 0.0370483 3.70906 0.104689 3.77487 L1.40255 5.03834 C1.53615 5.16819 1.75327 5.1698 1.88893 5.04195 C3.69167 3.38836 6.08395 2.46628 8.5713 2.46628 Z M8.56795 6.68656 C9.92527 6.68647 11.2341 7.19821 12.2403 8.12234 C12.3763 8.2535 12.5907 8.25065 12.7234 8.11593 L14.0106 6.79663 C14.0784 6.72742 14.1161 6.63355 14.1151 6.536 C14.1141 6.43844 14.0746 6.34536 14.0054 6.27757 C10.9416 3.38672 6.19688 3.38672 3.13305 6.27757 C3.06384 6.34536 3.02435 6.43849 3.02345 6.53607 C3.02254 6.63366 3.06028 6.72752 3.12822 6.79663 L4.41513 8.11593 C4.54778 8.25065 4.76215 8.2535 4.89823 8.12234 C5.90368 7.19882 7.21152 6.68713 8.56795 6.68656 Z M11.0924 9.48011 C11.0943 9.58546 11.0572 9.68703 10.9899 9.76084 L8.81327 12.2156 C8.74946 12.2877 8.66247 12.3283 8.5717 12.3283 C8.48093 12.3283 8.39394 12.2877 8.33013 12.2156 L6.1531 9.76084 C6.08585 9.68697 6.04886 9.58537 6.05085 9.48002 C6.05284 9.37467 6.09365 9.27491 6.16364 9.20429 C7.55374 7.8904 9.58966 7.8904 10.9798 9.20429 C11.0497 9.27497 11.0904 9.37476 11.0924 9.48011 Z"/></svg>
@@ -555,13 +557,13 @@ p { margin: 0; }
       <form class="panel" id="panel" aria-label="Find a connection">
         <label class="field">
           <span data-icon="regular:sign-in" data-size="20"></span>
-          <input class="value t-field" id="valueFrom" type="text" value="Biskupcova" placeholder="From" aria-label="From"
+          <input class="value t-field" id="valueFrom" type="text" value="Praha,,Divadlo pod Palmovkou" placeholder="From" aria-label="From"
                  autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="next">
           <span data-icon="regular:map-trifold" data-size="20"></span>
         </label>
         <label class="field">
           <span data-icon="regular:sign-out" data-size="20"></span>
-          <input class="value t-field" id="valueTo" type="text" value="Vozovna Žižkov" placeholder="To" aria-label="To"
+          <input class="value t-field" id="valueTo" type="text" value="Letiště Praha" placeholder="To" aria-label="To"
                  autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="search">
           <span data-icon="regular:map-trifold" data-size="20"></span>
         </label>
@@ -582,8 +584,8 @@ p { margin: 0; }
         <div class="more-title t-segment-active"><h1>Tickets</h1></div>
         <div class="empty-state">
           <span data-icon="duotone:ticket" data-size="48" data-cls="empty-ico"></span>
-          <p class="t-row">No active tickets</p>
-          <p class="t-row-meta empty-text">You have not bought any tickets yet.</p>
+          <p class="t-row">No current tickets.</p>
+          <p class="t-row-meta empty-text">Older tickets can be seen by pulling down.</p>
           <button type="button" class="btn t-button" id="buyTicket">Buy a ticket</button>
         </div>
       </section>
@@ -666,7 +668,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build f078aa1 -->
+  <!-- Build 3b8dafc -->
 </div>
 
 <script>
@@ -692,95 +694,109 @@ window.idosIcon = function (key, size, cls) {
 <script>
 // IDOS concept: trip data behind the trip-detail screen.
 //
-// ILLUSTRATIVE DATA. The Praha, Divadlo pod Palmovkou to Praha, Terminál 1 connection ("r0:0") copies a real IDOS
-// screen (the owner's screenshots of 09.10): legs, directions, times, platforms, restrictions, carriers and fare are as
-// shown there, except that the intermediate stop names are made up. Every other trip is plausible concept data.
+// ILLUSTRATIVE DATA, modelled on the owner's own screenshots of the original app (09.10, 10:21):
+//   - "Praha,,Divadlo pod Palmovkou" to Letiště Praha / Terminál 1 (f0, r0): the legs, directions, times, platforms,
+//     statuses, restrictions, carrier and fare are as the original shows them (Tram 3 > Metro A > Trol 59, 53 min, 19 km;
+//     Tram 24 > Metro A > Bus 322, 51 min). The stop names between the stops shown in the original are made up
+//     (only their counts, 9 / 5 / 6, are real).
+//   - Every other trip is plausible concept data.
 // Replace this file with a feed (API or MCP) later; the screen only reads the shape below.
 //
 // Key:    "<routeId>:<serviceIndex>"  (same ids as FAVORITES / RECENT in idos-prototype.html)
-// day:    minutes after midnight that "minute 0" of the prototype clock stands for on this route (default 9:41)
-// legs:   dep / arr are minutes after the start of the first leg; walk is the walking time before this leg
-//         line is a badge key (tram, bus, bus-x, train-red, train-green, metro-b), low marks a low-floor vehicle,
-//         status is "on" (on time) or "usual" (departure is usually on time), warn marks a leg with restrictions
-// from/to: n name, p platform letter, a step-free stop
+// day:    minutes after midnight that "minute 0" of the prototype clock stands for (default 10:21, when the screenshots were taken)
+// legs:   dep / arr are minutes after the start of the first leg; walk (+ note) is the transfer before this leg
+//         line is a badge key (tram, bus, bus-x, trol, train-red, train-green, metro-a, metro-b), low marks a low-floor vehicle,
+//         status is "on" (on time), "usual" (departure is usually on time) or absent, warn marks a leg with restrictions
+// from/to: n name, p platform, a step-free stop
 window.IDOS_TRIPS = (function () {
   var DPP = "Dopravní podnik hl.m. Prahy, a.s.; Praha 9; 296 191 817 (296 197 150)";
+  var ARRIVA = "ARRIVA CITY a.s.; Kladno; +420 739 648 200";
   var CD = "České dráhy, a.s.; Praha 1; 840 112 113";
   function city(a, b, price) { return { section: a + " - " + b, tariff: "long-term local ticket - zone P / in application", price: price || "30,-CZK / 27,-CZK (30 min)" }; }
   function stop(n, p, a) { return { n: n, p: p, a: !!a }; }
 
+  var RESTRICTIONS = [
+    "Exclusion in section Hercovka: dočasné přemístění zastávky",
+    "Exclusion in section Flora A: dočasné uzavření stanice metra"
+  ];
+  var TRAM3_VIA = ["Palmovka (ul. Zenklova)", "Balabenka", "Kolbenova", "Českomoravská", "Vysočanská", "Invalidovna", "Florenc", "Hlavní nádraží", "Muzeum"];
+  var METRO_A_VIA = ["Staroměstská", "Malostranská", "Hradčanská", "Dejvická", "Bořislavka"];
+  var TROL59_VIA = ["Zvonková", "Na Pískách", "Dědina", "Slánská", "Nová Ruzyně", "Terminál 2"];
+
+  var toTerminal = {   // Divadlo pod Palmovkou > Terminál 1, 53 min, 19 km
+    km: 19,
+    legs: [
+      { line: "tram", code: "3", dir: "Nádraží Braník (obratiště)", dep: 0, arr: 17, status: "on", warn: true, low: true,
+        from: stop("Divadlo pod Palmovkou", "A", true), to: stop("Václavské náměstí", "A", true), via: TRAM3_VIA },
+      { line: "metro-a", code: "A", dir: "Nemocnice Motol", walk: 4, dep: 22, arr: 34, warn: true,
+        from: stop("Můstek", "M2", true), to: stop("Nádraží Veleslavín", "M2", true), via: METRO_A_VIA },
+      { line: "trol", code: "59", dir: "Letiště", walk: 2, note: "Výstup E5", dep: 38, arr: 53, status: "usual", low: true,
+        from: stop("Nádraží Veleslavín", "2", false), to: stop("Terminál 1", "C", false), via: TROL59_VIA }
+    ],
+    restrictions: RESTRICTIONS,
+    carriers: [{ who: DPP }],
+    fare: { section: "Divadlo pod Palmovkou - Terminál 1", tariff: "long-term local ticket - zone P / in application", price: "50,-CZK / 46,-CZK (53 min)" }
+  };
+  var toTerminalBus = {   // the second option in the original: Tram 24 > Metro A > Bus 322, 51 min
+    km: 19,
+    legs: [
+      { line: "tram", code: "24", dir: "Kobylisy", dep: 0, arr: 17, status: "on", low: true,
+        from: stop("Divadlo pod Palmovkou", "A", true), to: stop("Václavské náměstí", "A", true), via: TRAM3_VIA },
+      { line: "metro-a", code: "A", dir: "Nemocnice Motol", walk: 4, dep: 23, arr: 35, warn: true,
+        from: stop("Můstek", "M2", true), to: stop("Nádraží Veleslavín", "M2", true), via: METRO_A_VIA },
+      { line: "bus", code: "322", dir: "Kladno,,autobusové nádraží", walk: 2, note: "Výstup E5", dep: 38, arr: 51, status: "usual", low: true, warn: true,
+        from: stop("Nádraží Veleslavín", "1", false), to: stop("Terminál 1", "A", false), via: ["Zvonková", "Na Pískách", "Dědina", "Nová Ruzyně"] }
+    ],
+    restrictions: RESTRICTIONS,
+    carriers: [{ who: DPP }, { who: ARRIVA }],
+    fare: { section: "Divadlo pod Palmovkou - Terminál 1", tariff: "long-term local ticket - zone P / in application", price: "50,-CZK / 46,-CZK (51 min)" }
+  };
+  var trol59 = {   // Nádraží Veleslavín > Letiště
+    km: 8,
+    legs: [{ line: "trol", code: "59", dir: "Letiště", dep: 0, arr: 15, status: "usual", low: true,
+      from: stop("Nádraží Veleslavín", "2", false), to: stop("Terminál 1", "C", false), via: TROL59_VIA }],
+    restrictions: [], carriers: [{ who: DPP }], fare: city("Nádraží Veleslavín", "Terminál 1")
+  };
+  var tram9 = { km: 4, legs: [{ line: "tram", code: "9", dir: "Vozovna Žižkov", dep: 0, arr: 9, status: "on", low: true,
+      from: stop("Biskupcova", "B", true), to: stop("Vozovna Žižkov", "A", true), via: ["Ohrada", "Husinecká"] }],
+    restrictions: [], carriers: [{ who: DPP }], fare: city("Biskupcova", "Vozovna Žižkov") };
+
   var trips = {
-    "r0:0": {
-      day: 190, km: 26,
-      legs: [
-        { line: "tram", code: "95", dir: "Ústřední dílny DP", dep: 0, arr: 28, status: "on", warn: true,
-          from: stop("Divadlo pod Palmovkou", "A", true), to: stop("Lazarská", "A", true),
-          via: ["Palmovka", "Invalidovna", "Florenc", "Dlouhá třída", "Náměstí Republiky", "Národní třída"] },
-        { line: "tram", code: "91", dir: "Divoká Šárka (obratiště)", dep: 32, arr: 67, status: "usual", warn: true, low: true,
-          from: stop("Lazarská", "B", true), to: stop("Divoká Šárka (obratiště)", "D", true),
-          via: ["Národní divadlo", "Malostranské náměstí", "Pražský hrad", "Hradčanská", "Dejvická", "Vítězné náměstí", "Nádraží Veleslavín", "Petřiny"] },
-        { line: "bus", code: "322", dir: "Kladno,,autobusové nádraží", walk: 2, dep: 70, arr: 80, status: "usual", warn: true, low: true,
-          from: stop("Praha,,Divoká Šárka", "I", false), to: stop("Praha,,Terminál 1", "A", false),
-          via: ["Dědina", "Nová Ruzyně"] }
-      ],
-      restrictions: [
-        "Exclusion in section Olšanské náměstí - Nákladové nádraží Žižkov: dočasné přerušení provozu tramvají",
-        "Exclusion in section Vozovna Strašnice: dočasné přemístění zastávky",
-        "Exclusion in section Buštěhrad",
-        "Exclusion in section Aviatická",
-        "Exclusion in section Kladno, autobusové nádraží"
-      ],
-      carriers: [
-        { who: DPP, lines: "Tram 95, Tram 91" },
-        { who: "ARRIVA CITY a.s.; Kladno; +420 739 648 200", lines: "Bus 100322" }
-      ],
-      fare: { section: "Divadlo pod Palmovkou - Divoká Šárka (obratiště)", tariff: "long-term local ticket - zone P / in application", price: "50,-CZK / 46,-CZK (67 min)" }
-    },
+    "f0:0": toTerminal, "f0:1": toTerminalBus,
+    "f1:0": trol59, "f1:1": trol59,
 
-    "f0:0": { km: 11, legs: [{ line: "bus", code: "119", dir: "Letiště", dep: 0, arr: 22, status: "on", low: true,
-        from: stop("Nádraží Veleslavín", "F", true), to: stop("Letiště Praha", "A", true), via: ["Divoká Šárka", "Dědina"] }],
-      restrictions: [], carriers: [{ who: DPP, lines: "Bus 119" }],
-      fare: { section: "Nádraží Veleslavín - Letiště Praha", tariff: "long-term local ticket - zones P, 0 / in application", price: "40,-CZK / 36,-CZK (90 min)" } },
+    "f2:0": { km: 2, legs: [{ line: "metro-b", code: "B", dir: "Černý Most", dep: 0, arr: 4,
+        from: stop("Můstek", "M2", true), to: stop("Florenc", "M2", true), via: ["Náměstí Republiky"] }],
+      restrictions: [], carriers: [{ who: DPP }], fare: city("Můstek", "Florenc") },
 
-    "f0:1": { km: 11, legs: [{ line: "bus-x", code: "X109", dir: "Letiště", dep: 0, arr: 17, status: "on", low: true,
-        from: stop("Nádraží Veleslavín", "A", true), to: stop("Letiště Praha", "A", true), via: ["Divoká Šárka"] }],
-      restrictions: [], carriers: [{ who: DPP, lines: "Bus X109" }],
-      fare: { section: "Nádraží Veleslavín - Letiště Praha", tariff: "long-term local ticket - zones P, 0 / in application", price: "40,-CZK / 36,-CZK (90 min)" } },
+    "f2:1": { km: 2, legs: [{ line: "tram", code: "3", dir: "Palmovka", dep: 0, arr: 9, status: "on", low: true,
+        from: stop("Můstek", "B", true), to: stop("Florenc", "B", true), via: ["Jindřišská", "Hlavní nádraží"] }],
+      restrictions: [], carriers: [{ who: DPP }], fare: city("Můstek", "Florenc") },
 
-    "f1:0": { km: 2, legs: [{ line: "metro-b", code: "B", dir: "Černý Most", dep: 0, arr: 4, status: "on", low: true,
-        from: stop("Můstek", "2", true), to: stop("Florenc", "1", true), via: ["Náměstí Republiky"] }],
-      restrictions: [], carriers: [{ who: DPP, lines: "Metro B" }], fare: city("Můstek", "Florenc") },
-
-    "f1:1": { km: 2, legs: [{ line: "tram", code: "24", dir: "Florenc", dep: 0, arr: 9, status: "on",
-        from: stop("Můstek", "B", false), to: stop("Florenc", "B", false), via: ["Jindřišská", "Hlavní nádraží"] }],
-      restrictions: [], carriers: [{ who: DPP, lines: "Tram 24" }], fare: city("Můstek", "Florenc") },
-
-    "f2:0": { km: 93, legs: [{ line: "train-red", code: "R20", dir: "Praha hl.n.", dep: 0, arr: 85, status: "usual", low: true,
-        from: stop("Ústí nad Labem hl.n.", "3", true), to: stop("Praha hl.n.", "7", true),
+    "f3:0": { km: 93, legs: [{ line: "train-red", code: "R20", dir: "Praha hl.n.", dep: 0, arr: 85, status: "usual", low: true,
+        from: stop("Ústí nad Labem,,hl.nádr.", "3", true), to: stop("Praha,,Hlavní nádraží", "7", true),
         via: ["Lovosice", "Roudnice nad Labem", "Kralupy nad Vltavou", "Praha-Holešovice"] }],
-      restrictions: [], carriers: [{ who: CD, lines: "R20" }],
-      fare: { section: "Ústí nad Labem hl.n. - Praha hl.n.", tariff: "ČD basic fare, 2nd class", price: "179,-CZK" } },
+      restrictions: [], carriers: [{ who: CD }],
+      fare: { section: "Ústí nad Labem,,hl.nádr. - Praha,,Hlavní nádraží", tariff: "ČD basic fare, 2nd class", price: "179,-CZK" } },
 
-    "f2:1": { km: 93, legs: [{ line: "train-green", code: "Ex5", dir: "Praha hl.n.", dep: 0, arr: 72, status: "usual",
-        from: stop("Ústí nad Labem hl.n.", "8", true), to: stop("Praha hl.n.", "5", true), via: ["Lovosice", "Praha-Holešovice"] }],
-      restrictions: [], carriers: [{ who: CD, lines: "Ex5" }],
-      fare: { section: "Ústí nad Labem hl.n. - Praha hl.n.", tariff: "ČD basic fare, 2nd class", price: "199,-CZK" } },
-
-    "f3:0": { km: 4, legs: [{ line: "tram", code: "9", dir: "Vozovna Žižkov", dep: 0, arr: 9, status: "on", low: true,
-        from: stop("Biskupcova", "B", true), to: stop("Vozovna Žižkov", "A", true), via: ["Ohrada", "Husinecká"] }],
-      restrictions: [], carriers: [{ who: DPP, lines: "Tram 9" }], fare: city("Biskupcova", "Vozovna Žižkov") },
+    "f3:1": { km: 93, legs: [{ line: "train-green", code: "Ex5", dir: "Praha hl.n.", dep: 0, arr: 72, status: "usual",
+        from: stop("Ústí nad Labem,,hl.nádr.", "8", true), to: stop("Praha,,Hlavní nádraží", "5", true), via: ["Lovosice", "Praha-Holešovice"] }],
+      restrictions: [], carriers: [{ who: CD }],
+      fare: { section: "Ústí nad Labem,,hl.nádr. - Praha,,Hlavní nádraží", tariff: "ČD basic fare, 2nd class", price: "199,-CZK" } },
 
     "r2:0": { km: 62, legs: [{ line: "train-red", code: "S1", dir: "Kolín", dep: 0, arr: 52, status: "usual", low: true,
         from: stop("Praha hl.n.", "5", true), to: stop("Kolín", "2", true), via: ["Praha-Libeň", "Praha-Vysočany", "Úvaly", "Český Brod"] }],
-      restrictions: [], carriers: [{ who: CD, lines: "S1" }],
+      restrictions: [], carriers: [{ who: CD }],
       fare: { section: "Praha hl.n. - Kolín", tariff: "PID regional ticket - zones P, 1, 2, 3, 4", price: "75,-CZK / 68,-CZK (90 min)" } },
 
     "r3:0": { km: 3, legs: [{ line: "bus", code: "133", dir: "Krejcárek", dep: 0, arr: 8, status: "on", low: true,
         from: stop("Husinecká", "A", true), to: stop("Krejcárek", "B", true), via: ["Ohrada"] }],
-      restrictions: [], carriers: [{ who: DPP, lines: "Bus 133" }], fare: city("Husinecká", "Krejcárek") }
+      restrictions: [], carriers: [{ who: DPP }], fare: city("Husinecká", "Krejcárek") }
   };
 
-  trips["r1:0"] = trips["f3:0"];   // the same Biskupcova to Vozovna Žižkov tram appears in Recent
+  // Recent shares trips with the routes they repeat
+  trips["r0:0"] = toTerminal; trips["r0:1"] = toTerminalBus;   // Praha,,Divadlo pod Palmovkou > Terminál 1
+  trips["r1:0"] = tram9;                                         // Biskupcova > Vozovna Žižkov
   return trips;
 })();
 
@@ -800,28 +816,29 @@ window.IDOS_TRIPS = (function () {
   var GLYPH = {
     "tram": ["custom:tram"], "bus": ["fill:bus"], "bus-x": ["regular:arrow-elbow-down-right", "fill:bus"],
     "train-red": ["fill:train"], "train-green": ["fill:train"],
-    "metro-a": ["custom:metro"], "metro-b": ["custom:metro"], "metro-c": ["custom:metro"]
+    "metro-a": ["custom:metro"], "metro-b": ["custom:metro"], "metro-c": ["custom:metro"], "trol": ["fill:bus"]
   };
 
   // A route lists the services that run on it. A service departs `first` minutes after load,
   // then every `every` minutes. The chips are always the next VISIBLE departures across all services.
-  var FAVORITES = [
-    { id: "f0", from: "Nádraží Veleslavín", to: "Letiště Praha", services: [
-      { line: "bus", code: "119", platform: "F", wheelchair: true, cooled: true, first: 1, every: 15 },
-      { line: "bus-x", code: "X109", platform: "A", wheelchair: true, cooled: true, first: 12, every: 20 } ] },
-    { id: "f1", from: "Můstek", to: "Florenc", services: [
-      { line: "metro-b", code: "B", platform: "2", wheelchair: true, cooled: true, first: 1, every: 8 },
-      { line: "tram", code: "24", platform: "B", first: 7, every: 10 } ] },
-    { id: "f2", from: "Ústí nad Labem, hlavní nádraží", to: "Praha, hlavní nádraží", services: [
+  var FAVORITES = [   // the saved connections of the original app, with its lines and minutes (10:21)
+    { id: "f0", from: "Praha,,Divadlo pod Palmovkou", to: "Letiště Praha", services: [
+      { line: "tram", code: "3", platform: "A", wheelchair: true, first: 2, every: 30 },
+      { line: "tram", code: "24", platform: "A", wheelchair: true, first: 6, every: 30 } ] },
+    { id: "f1", from: "Nádraží Veleslavín", to: "Letiště Praha", services: [
+      { line: "trol", code: "59", platform: "2", wheelchair: true, first: 4, every: 10 },
+      { line: "trol", code: "59", platform: "2", wheelchair: true, first: 9, every: 10 } ] },
+    { id: "f2", from: "Můstek", to: "Florenc", services: [
+      { line: "metro-b", code: "B", platform: "M2", first: 1, every: 8 },
+      { line: "tram", code: "3", platform: "B", wheelchair: true, first: 2, every: 10 } ] },
+    { id: "f3", from: "Ústí nad Labem,,hl.nádr.", to: "Praha,,Hlavní nádraží", services: [
       { line: "train-red", code: "R20", platform: "3", wheelchair: true, cooled: true, first: 17, every: 60 },
-      { line: "train-green", code: "Ex5", platform: "8", cooled: true, first: 43, every: 120 } ] },
-    { id: "f3", from: "Biskupcova", to: "Vozovna Žižkov", services: [
-      { line: "tram", code: "9", platform: "B", wheelchair: true, cooled: true, first: 3, every: 8 } ] }
+      { line: "train-green", code: "Ex5", platform: "8", cooled: true, first: 43, every: 120 } ] }
   ];
   var RECENT = [
-    // r0 is a real IDOS connection (idos-trips.js): a night tram, so its trip screen runs on a 3:10 clock
-    { id: "r0", from: "Praha, Divadlo pod Palmovkou", to: "Praha, Terminál 1", services: [
-      { line: "tram", code: "95", platform: "A", wheelchair: true, first: 3, every: 30 } ] },
+    { id: "r0", from: "Praha,,Divadlo pod Palmovkou", to: "Praha,,Terminál 1", services: [
+      { line: "tram", code: "3", platform: "A", wheelchair: true, first: 2, every: 30 },
+      { line: "tram", code: "24", platform: "A", wheelchair: true, first: 6, every: 30 } ] },
     { id: "r1", from: "Biskupcova", to: "Vozovna Žižkov", services: [
       { line: "tram", code: "9", platform: "B", wheelchair: true, cooled: true, first: 3, every: 8 } ] },
     { id: "r2", from: "Praha hl.n.", to: "Kolín", services: [
@@ -1105,7 +1122,7 @@ window.IDOS_TRIPS = (function () {
   var TRIPS = window.IDOS_TRIPS || {};
   var ROUTES = {};
   FAVORITES.concat(RECENT).forEach(function (r) { ROUTES[r.id] = r; });
-  var MODE = { tram: "Tram", bus: "Bus", "bus-x": "Bus", "train-red": "Train", "train-green": "Train", "metro-a": "Metro", "metro-b": "Metro", "metro-c": "Metro" };
+  var MODE = { tram: "Tram", trol: "Trol", bus: "Bus", "bus-x": "Bus", "train-red": "Train", "train-green": "Train", "metro-a": "Metro", "metro-b": "Metro", "metro-c": "Metro" };
 
   var tripEl = document.getElementById("trip"), tripScroll = document.getElementById("tripScroll");
   var tripBar = tripEl.querySelector(".trip-bar"), tripRule = tripEl.querySelector(".rule");
@@ -1140,7 +1157,7 @@ window.IDOS_TRIPS = (function () {
     legs.forEach(function (l, i) {
       var via = l.via || [], vid = "via-" + i;
       var glyphs = GLYPH[l.line].map(function (k) { return icon(k, 16); }).join("");
-      if (l.walk) html += '<div class="transfer t-row-meta">' + icon("regular:person-simple-walk", 20) + "<span>transfer about " + l.walk + " min</span></div>";
+      if (l.walk) html += '<div class="transfer t-row-meta">' + icon("regular:person-simple-walk", 20) + "<span>transfer about " + l.walk + " min" + (l.note ? " (" + esc(l.note) + ")" : "") + "</span></div>";
       html += '<section class="leg"><div class="leg-head">' +
         '<span class="line-tag" data-line="' + l.line + '" role="img" aria-label="' + esc(MODE[l.line] + " " + l.code) + '">' + glyphs + '<span class="t-code">' + esc(l.code) + "</span></span>" +
         (l.low ? '<span class="acc" role="img" aria-label="Low-floor vehicle">' + icon("regular:wheelchair", 16) + "</span>" : "") +
@@ -1154,7 +1171,7 @@ window.IDOS_TRIPS = (function () {
             return '<div class="via-row t-row-meta"><span class="time">' + fmt(start + at) + '</span><span class="name">' + esc(n) + "</span></div>";
           }).join("") + "</div></div>" : "") +
         stopHtml(start + l.arr, l.to) + "</div>" +
-        '<p class="leg-status t-row-meta">' + (l.status === "on" ? "on time" : "departure is usually on time") + icon("regular:clock-counter-clockwise", 16) + "</p></section>";
+        (l.status ? '<p class="leg-status t-row-meta">' + (l.status === "on" ? "on time" : "departure is usually on time") + icon("regular:clock-counter-clockwise", 16) + "</p>" : "") + "</section>";
     });
     html += "</div>";
 
@@ -1164,7 +1181,7 @@ window.IDOS_TRIPS = (function () {
     }
     if (d.carriers && d.carriers.length) {
       html += '<section class="sec"><h2 class="sec-title t-place-strong">Carriers and contacts</h2><div class="group">' +
-        d.carriers.map(function (k) { return '<div class="info-row"><span class="bullet" aria-hidden="true"></span><p class="t-row-meta">' + esc(k.who) + ' <span class="sub">(' + esc(k.lines) + ")</span></p></div>"; }).join("") + "</div></section>";
+        d.carriers.map(function (k) { return '<div class="info-row"><span class="bullet" aria-hidden="true"></span><p class="t-row-meta">' + esc(k.who) + "</p></div>"; }).join("") + "</div></section>";
     }
     if (d.fare) {
       html += '<section class="sec"><h2 class="sec-title t-place-strong">Fare</h2><div class="group"><dl class="fare t-row-meta">' +
@@ -1193,7 +1210,7 @@ window.IDOS_TRIPS = (function () {
   function showTrip(routeId, idx, t, from) {
     var data = TRIPS[routeId + ":" + idx], r = ROUTES[routeId];
     if (!data) { toast("Trip details are not part of this concept yet"); return; }
-    openTrip({ routeId: routeId, t: t, data: data, day: data.day == null ? 581 : data.day, key: routeId + ":" + idx + ":" + t, title: r.from + " to " + r.to }, from);
+    openTrip({ routeId: routeId, t: t, data: data, day: data.day == null ? 621 : data.day, key: routeId + ":" + idx + ":" + t, title: r.from + " to " + r.to }, from);
   }
   function openTrip(c, from) {
     current = c;
@@ -1332,10 +1349,10 @@ window.IDOS_TRIPS = (function () {
         var slot = res.slots[k];
         if (!slot) return;
         var data = TRIPS[res.route.id + ":" + slot.idx];
-        item = { data: data, t: slot.t, day: data.day == null ? 581 : data.day, routeId: res.route.id, key: res.route.id + ":" + slot.idx + ":" + slot.t, n: k };
+        item = { data: data, t: slot.t, day: data.day == null ? 621 : data.day, routeId: res.route.id, key: res.route.id + ":" + slot.idx + ":" + slot.t, n: k };
       } else {
         res.lastT = res.lastT == null ? clock + 2 + hash(res.a + res.b) % 4 : res.lastT + 6 + hash(res.a + res.b + k) % 6;
-        item = { data: genTrip(res.a, res.b, k), t: res.lastT, day: 581, routeId: null, key: "s:" + hash(res.a + res.b) + ":" + k + ":" + res.lastT, n: k };
+        item = { data: genTrip(res.a, res.b, k), t: res.lastT, day: 621, routeId: null, key: "s:" + hash(res.a + res.b) + ":" + k + ":" + res.lastT, n: k };
       }
       res.items.push(item);
     }
@@ -1358,7 +1375,7 @@ window.IDOS_TRIPS = (function () {
           (l.low ? '<span class="acc" role="img" aria-label="Low-floor vehicle">' + icon("regular:wheelchair", 16) + "</span>" : "") +
           (l.warn ? '<span class="warn" role="img" aria-label="Traffic restrictions on this leg">' + icon("regular:warning", 16) + "</span>" : "") + "</span>" +
           rStop(start + l.dep, l.from) + rStop(start + l.arr, l.to) +
-          '<span class="rleg-status t-row-meta">' + (l.status === "on" ? "on time" : "departure is usually on time") + icon("regular:clock-counter-clockwise", 16) + "</span></span>";
+          (l.status ? '<span class="rleg-status t-row-meta">' + (l.status === "on" ? "on time" : "departure is usually on time") + icon("regular:clock-counter-clockwise", 16) + "</span>" : "") + "</span>";
       }).join("") + '</span><span class="chev" aria-hidden="true">' + icon("regular:caret-right", 16) + "</span></button>";
   }
   function renderResults(focusIndex) {
@@ -1579,22 +1596,29 @@ window.IDOS_TRIPS = (function () {
       else { orig.innerHTML = ""; shown = ""; }
     }
     function at(e) { var r = overlay.getBoundingClientRect(); return (r.right - e.clientX) / r.width * 100; }
-    handle.addEventListener("pointerdown", function (e) { dragging = true; moved = false; handle.setPointerCapture(e.pointerId); });
-    handle.addEventListener("pointermove", function (e) {
-      if (!dragging) return;
-      var v = at(e);
-      if (v > 93) v = 100; else if (v < 7) v = 0;     // a finger cannot touch the very edge of the glass, so the last 7% docks while you drag
-      if (!moved && Math.abs(v - rev) < 2) return;    // a tap is not a drag
-      moved = true; overlay.classList.add("is-dragging"); set(v);
-    });
-    function end() {
-      if (!dragging) return;
-      dragging = false; overlay.classList.remove("is-dragging");
-      if (!moved) set(rev > 0 ? 0 : 50);              // tap: show half, or put it away
-      else if (rev < 6) set(0);                        // let go near an edge: it docks there, a clean prototype or a clean original
-      else if (rev > 94) set(100);
+    // On release the handle finishes the move by itself: to the side it was pulled towards. A quick flick decides by its direction,
+    // a slow drag by which side of the middle it was let go on. Both ends are clean screens, so there is no resting place in between.
+    var samples = [], glideFrame = 0;
+    function stopGlide() { cancelAnimationFrame(glideFrame); overlay.classList.remove("is-dragging"); }
+    function glide(target) {
+      stopGlide();
+      var from = rev, start = performance.now(), reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches && !document.documentElement.classList.contains("motion-on");
+      if (reduce || from === target) { set(target); return; }
+      var dur = 180 + 160 * Math.abs(target - from) / 100;    // 180 to 340 ms, longer for a longer way
+      overlay.classList.add("is-dragging");                   // no CSS transitions while the script drives it
+      (function step(now) {
+        var p = Math.min(1, (now - start) / dur), eased = 1 - Math.pow(1 - p, 3);
+        set(from + (target - from) * eased);
+        if (p < 1) glideFrame = requestAnimationFrame(step); else { set(target); overlay.classList.remove("is-dragging"); }
+      })(start);
     }
-    // the left part is only a picture of the original app: say so where the finger is
+    function velocity() {   // percent per millisecond over the last ~90 ms, + means towards the original
+      var last = samples[samples.length - 1], i = samples.length - 2;   // at least the previous sample, then back while within ~90 ms
+      while (i > 0 && last.t - samples[i - 1].t < 90) i--;
+      var first = samples[i];
+      return last.t === first.t ? 0 : (last.v - first.v) / (last.t - first.t);
+    }
+    // the picture is only a picture of the original app: say so where the finger is
     var hint = document.getElementById("cmpHint"), hintTimer = 0;
     function hideHint() { clearTimeout(hintTimer); hint.hidden = true; }
     orig.addEventListener("click", function (e) {
@@ -1607,6 +1631,22 @@ window.IDOS_TRIPS = (function () {
       clearTimeout(hintTimer);
       hintTimer = setTimeout(hideHint, 3200);
     });
+    handle.addEventListener("pointerdown", function (e) { stopGlide(); dragging = true; moved = false; samples = []; handle.setPointerCapture(e.pointerId); });
+    handle.addEventListener("pointermove", function (e) {
+      if (!dragging) return;
+      var v = at(e);
+      if (v > 93) v = 100; else if (v < 7) v = 0;     // a finger cannot touch the very edge of the glass, so the last 7% docks while you drag
+      if (!moved && Math.abs(v - rev) < 2) return;    // a tap is not a drag
+      moved = true; overlay.classList.add("is-dragging"); set(v);
+      samples.push({ t: performance.now(), v: rev }); if (samples.length > 8) samples.shift();
+    });
+    function end() {
+      if (!dragging) return;
+      dragging = false; overlay.classList.remove("is-dragging");
+      if (!moved) { glide(rev > 0 ? 0 : 100); return; }                     // a tap: all the way in, or all the way out
+      var vel = samples.length > 1 ? velocity() : 0;
+      glide(Math.abs(vel) > 0.04 ? (vel > 0 ? 100 : 0) : (rev >= 50 ? 100 : 0));
+    }
     handle.addEventListener("pointerup", end);
     handle.addEventListener("pointercancel", end);
     handle.addEventListener("keydown", function (e) {
