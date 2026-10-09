@@ -52,6 +52,7 @@ body { margin: 0; }
   --bg-surface: var(--neutral-0);           /* chips, search panel, swap button */
   --text-primary: var(--neutral-1000);
   --text-secondary: var(--neutral-600);     /* 5.33:1 on white, 4.70:1 on canvas: passes AA */
+  --text-placeholder: #767676;               /* 4.54:1 on white: the lightest grey that still passes AA; typed text is --text-primary */
   --text-inverse: var(--neutral-0);          /* text on a --text-primary surface (the toast) */
   --on-action: var(--neutral-0);             /* text on --action-primary: white in both themes */
   --text-brand: var(--brand-500);
@@ -123,6 +124,7 @@ body { margin: 0; }
   --text-primary: #FFFFFF;                  /* 16.5:1 on surface */
   --text-secondary: #9A9A9A;                /* 5.9:1 on surface, 6.6:1 on canvas */
   --text-inverse: #141414;
+  --text-placeholder: #8C8C8C;               /* 4.9:1 on the dark surface */
   --text-brand: #4DA6E8;                    /* 6.2:1 on surface; the light brand (#0171BB) is only 3.2:1 here */
   --icon-primary: #FFFFFF;
   --icon-secondary: #8A8A8A;                /* 4.8:1 on surface */
@@ -142,6 +144,7 @@ body { margin: 0; }
     --text-primary: #FFFFFF;                  /* 16.5:1 on surface */
     --text-secondary: #9A9A9A;                /* 5.9:1 on surface, 6.6:1 on canvas */
     --text-inverse: #141414;
+    --text-placeholder: #8C8C8C;
     --text-brand: #4DA6E8;                    /* 6.2:1 on surface; the light brand (#0171BB) is only 3.2:1 here */
     --icon-primary: #FFFFFF;
     --icon-secondary: #8A8A8A;                /* 4.8:1 on surface */
@@ -299,15 +302,14 @@ p { margin: 0; }
 .panel { position: relative; flex: none; margin: var(--space-8) var(--margin-panel) 0; background: var(--bg-surface); border-radius: var(--radius-sm); }
 .field { display: flex; align-items: center; gap: var(--space-8); width: 100%; height: var(--row-field); padding: 0 var(--space-16); color: var(--icon-secondary); cursor: text; }
 .field + .field { border-top: 1px solid var(--border-subtle); }
-/* a real text input: Figma draws the value in text-secondary, it turns primary while being edited */
+/* a real text input. The grey text in the Figma frame is the placeholder (the last search); what a person types is text-primary, always */
 .field .value {
   flex: 1; min-width: 0; height: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; outline: 0; background: none;
   -webkit-appearance: none; appearance: none; text-overflow: ellipsis;
-  color: var(--text-secondary); caret-color: var(--action-primary);
+  color: var(--text-primary); caret-color: var(--action-primary);
   -webkit-user-select: text; user-select: text;   /* the device frame disables selection; an input must not inherit that */
 }
-.field .value::placeholder { color: var(--text-secondary); opacity: 1; }
-.field:focus-within .value { color: var(--text-primary); }
+.field .value::placeholder { color: var(--text-placeholder); opacity: 1; }
 .swap {
   position: absolute; top: 36px; right: 38px; width: 40px; height: 40px; border-radius: var(--radius-full);   /* 10px closer to the edge than before: a long stop name no longer reaches it, and 16px would run into the map icon */
   display: flex; align-items: center; justify-content: center;
@@ -559,13 +561,13 @@ p { margin: 0; }
       <form class="panel" id="panel" aria-label="Find a connection">
         <label class="field">
           <span data-icon="regular:sign-in" data-size="20"></span>
-          <input class="value t-field" id="valueFrom" type="text" value="Praha,,Divadlo pod Palmovkou" placeholder="From" aria-label="From"
+          <input class="value t-field" id="valueFrom" type="text" value="" placeholder="Praha,,Divadlo pod Palmovkou" aria-label="From"
                  autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="next">
           <span data-icon="regular:map-trifold" data-size="20"></span>
         </label>
         <label class="field">
           <span data-icon="regular:sign-out" data-size="20"></span>
-          <input class="value t-field" id="valueTo" type="text" value="Letiště Praha" placeholder="To" aria-label="To"
+          <input class="value t-field" id="valueTo" type="text" value="" placeholder="Letiště Praha" aria-label="To"
                  autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="search">
           <span data-icon="regular:map-trifold" data-size="20"></span>
         </label>
@@ -670,7 +672,7 @@ p { margin: 0; }
       </div>
     </div>
   </div>
-  <!-- Build b757c34 -->
+  <!-- Build 534d44b -->
 </div>
 
 <script>
@@ -1101,13 +1103,15 @@ window.IDOS_TRIPS = (function () {
 
   var swap = document.getElementById("swap");
   swap.addEventListener("click", function () {
-    var t = from.value; from.value = to.value; to.value = t;
+    var t = from.value, p = from.placeholder;
+    from.value = to.value; from.placeholder = to.placeholder;
+    to.value = t; to.placeholder = p;
     swap.classList.toggle("is-flipped");
   });
   document.getElementById("panel").addEventListener("submit", function (e) {
     e.preventDefault();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    openResults(from.value, to.value, e.submitter || document.querySelector("#panel .cta"));
+    openResults(from.value || from.placeholder, to.value || to.placeholder, e.submitter || document.querySelector("#panel .cta"));
   });
   // iOS scrolls overflow:hidden ancestors to reveal a focused field and can leave them shifted once the keyboard closes
   document.addEventListener("focusout", function () {
